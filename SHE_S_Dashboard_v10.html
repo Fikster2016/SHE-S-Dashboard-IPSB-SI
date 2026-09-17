@@ -1,0 +1,2138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SHE-S Dashboard — IPSB Seri Iskandar</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+/* ── BASE ─────────────────────────────────────────────────── */
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f0f2f5;color:#1a202c;font-size:13px}
+button{cursor:pointer;font-family:inherit}
+
+/* ── HEADER ──────────────────────────────────────────────── */
+.header{background:#0D2137;padding:14px 24px;display:flex;justify-content:space-between;align-items:center;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.header h1{font-size:15px;font-weight:500;color:#fff;letter-spacing:0.3px}
+.header p{font-size:10px;color:#C8972B;margin-top:2px}
+.hright{text-align:right}
+.hright .site{font-size:11px;color:#a0b0c0}
+.hright .per{font-size:10px;color:#566a7a;margin-top:2px}
+.gold-bar{height:3px;background:linear-gradient(90deg,#C8972B,#e6b44a,#C8972B);-webkit-print-color-adjust:exact;print-color-adjust:exact}
+
+/* ── CONTROL BAR ─────────────────────────────────────────── */
+.ctrl-bar{background:#fff;border-bottom:0.5px solid #dde1e7;padding:7px 24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.ctrl-bar label{font-size:10px;color:#6b7280;font-weight:500;text-transform:uppercase;letter-spacing:0.4px}
+select.ctrl{font-size:11px;border:0.5px solid #c8cdd5;border-radius:4px;padding:4px 10px;color:#0D2137;background:#fff;font-weight:500}
+.filter-tag{background:#e8f0fb;color:#1a56a0;font-size:9px;padding:2px 8px;border-radius:10px;font-weight:500;display:none}
+.filter-tag.active{display:inline-block}
+.ctrl-actions{margin-left:auto;display:flex;gap:8px;align-items:center}
+.btn{font-size:10px;padding:5px 12px;border-radius:4px;border:none;font-weight:500;transition:opacity 0.15s}
+.btn-navy{background:#0D2137;color:#fff}
+.btn-gold{background:#C8972B;color:#fff}
+.btn-outline{background:#fff;color:#0D2137;border:0.5px solid #c8cdd5}
+.btn:hover{opacity:0.85}
+
+/* ── BODY ────────────────────────────────────────────────── */
+.body{padding:14px 22px;display:flex;flex-direction:column;gap:12px}
+
+/* ── KPI ROW ─────────────────────────────────────────────── */
+.kpi-row{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+.kpi{background:#fff;border-radius:7px;padding:11px 13px;border:0.5px solid #dde1e7;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.kpi-label{font-size:9px;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;font-weight:500;margin-bottom:5px}
+.kpi-value{font-size:22px;font-weight:600;color:#0D2137;line-height:1}
+.kpi-sub{font-size:9px;color:#9ca3af;margin-top:3px}
+.kpi-ctx{font-size:9px;color:#b0b8c4;margin-top:1px;min-height:12px}
+.kpi-gold{border-top:3px solid #C8972B;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.kpi-red{border-top:3px solid #d03b3b;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.kpi-amber{border-top:3px solid #eda100;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.kpi-purple{border-top:3px solid #4a3aa7;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.kpi-teal{border-top:3px solid #0e7a6a;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.kpi-green{border-top:3px solid #1baf7a;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.kpi-blue{border-top:3px solid #2a78d6;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+
+/* ── CARDS ───────────────────────────────────────────────── */
+.card{background:#fff;border-radius:7px;border:0.5px solid #dde1e7;padding:13px 15px}
+.card-title{font-size:10px;font-weight:600;color:#0D2137;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;padding-bottom:8px;border-bottom:0.5px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center}
+.card-title .sub{color:#9ca3af;font-weight:400;text-transform:none;letter-spacing:0;font-size:9px}
+
+/* ── GRID LAYOUTS ────────────────────────────────────────── */
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.row3{display:grid;grid-template-columns:2fr 1fr;gap:11px}
+.row3b{display:grid;grid-template-columns:1fr 2fr;gap:11px}
+.row4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:11px}
+.row-3eq{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px}
+.row-full{display:grid;grid-template-columns:1fr;gap:11px}
+
+/* ── CHARTS ──────────────────────────────────────────────── */
+.chart-wrap{position:relative;width:100%}
+.donut-pair{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.donut-label{font-size:9px;color:#9ca3af;text-align:center;margin-bottom:4px}
+.legend{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px;font-size:10px;color:#6b7280}
+.legend-item{display:flex;align-items:center;gap:3px}
+.legend-sq{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+
+/* ── ROOT CAUSES ─────────────────────────────────────────── */
+.root-list{display:flex;flex-direction:column;gap:7px}
+.root-item{display:flex;align-items:center;gap:8px}
+.root-bar-bg{flex:1;background:#f0f2f5;border-radius:3px;height:6px;overflow:hidden}
+.root-bar{height:6px;border-radius:3px;background:#0D2137;transition:width 0.4s}
+.root-lbl{font-size:10px;color:#374151;min-width:170px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500}
+.root-cnt{font-size:10px;color:#6b7280;min-width:16px;text-align:right}
+
+/* ── PTW SECTION ─────────────────────────────────────────── */
+.ptw-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.ptw-stat{text-align:center;padding:8px;background:#f8f9fa;border-radius:5px}
+.ptw-stat-val{font-size:18px;font-weight:600;color:#0D2137}
+.ptw-stat-lbl{font-size:9px;color:#6b7280;margin-top:2px}
+
+/* ── PROGRESS BARS ───────────────────────────────────────── */
+.prog-row{display:flex;flex-direction:column;gap:8px}
+.prog-item{display:flex;flex-direction:column;gap:3px}
+.prog-header{display:flex;justify-content:space-between;font-size:10px;color:#374151}
+.prog-pct{font-weight:600;color:#0D2137}
+.prog-bg{background:#f0f2f5;border-radius:3px;height:7px;overflow:hidden}
+.prog-fill{height:7px;border-radius:3px;transition:width 0.5s}
+
+/* ── TABLES ──────────────────────────────────────────────── */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:11px}
+th{background:#0D2137;color:#C8972B;text-align:left;padding:6px 10px;font-weight:500;font-size:10px;letter-spacing:0.3px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+td{padding:6px 10px;border-bottom:0.5px solid #eee;color:#374151;vertical-align:middle}
+tr:hover td{background:#f9fafb}
+.badge{display:inline-block;padding:2px 7px;border-radius:3px;font-size:9px;font-weight:500}
+.b-minor{background:#e8f5e9;color:#2e7d32}
+.b-moderate{background:#fff3e0;color:#c45600}
+.b-major{background:#fce4ec;color:#b71c1c}
+.b-open{background:#fce4ec;color:#b71c1c}
+.b-inprog{background:#fff3e0;color:#c45600}
+.b-closed{background:#e8f5e9;color:#2e7d32}
+.b-planned{background:#e8eaf6;color:#3949ab}
+.b-active{background:#e3f2fd;color:#1565c0}
+.b-completed{background:#e8f5e9;color:#2e7d32}
+.b-onhold{background:#f3f4f6;color:#6b7280}
+
+/* ── FILTER ROW ──────────────────────────────────────────── */
+.filter-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.filter-row label{font-size:10px;color:#6b7280;font-weight:500}
+select.filter{font-size:10px;border:0.5px solid #d1d5db;border-radius:4px;padding:3px 7px;color:#374151;background:#fff}
+.rowcount{margin-left:auto;font-size:10px;color:#9ca3af}
+
+/* ── LEADING INDICATORS ──────────────────────────────────── */
+.indicator-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.ind-card{background:#f8f9fa;border-radius:6px;padding:12px;border:0.5px solid #e5e7eb}
+.ind-title{font-size:9px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px}
+.ind-val{font-size:24px;font-weight:600;color:#0D2137}
+.ind-target{font-size:9px;color:#9ca3af;margin-top:2px}
+.ind-bar-bg{background:#e5e7eb;border-radius:3px;height:5px;margin-top:6px;overflow:hidden}
+.ind-bar-fill{height:5px;border-radius:3px}
+
+/* ── DATA PANEL (MODAL) ──────────────────────────────────── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:1000;align-items:center;justify-content:center}
+.overlay.open{display:flex}
+.panel{background:#fff;border-radius:10px;width:680px;max-width:95vw;max-height:90vh;display:flex;flex-direction:column;overflow:hidden}
+.panel-header{background:#0D2137;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.panel-header h2{font-size:13px;font-weight:500;color:#fff}
+.panel-close{background:none;border:none;color:#a0b0c0;font-size:18px;padding:0 4px;line-height:1}
+.panel-tabs{display:flex;border-bottom:0.5px solid #e5e7eb;background:#f8f9fa}
+.ptab{padding:9px 16px;font-size:11px;font-weight:500;color:#6b7280;border:none;background:none;border-bottom:2px solid transparent;cursor:pointer}
+.ptab.active{color:#0D2137;border-bottom-color:#C8972B}
+.panel-body{padding:16px;overflow-y:auto;flex:1}
+.panel-section{display:none}
+.panel-section.active{display:block}
+.form-group{margin-bottom:12px}
+.form-group label{display:block;font-size:10px;font-weight:500;color:#374151;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.3px}
+.form-group input,.form-group select,.form-group textarea{width:100%;border:0.5px solid #d1d5db;border-radius:5px;padding:7px 10px;font-size:11px;color:#374151;font-family:inherit}
+.form-group textarea{resize:vertical;min-height:60px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.form-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.form-submit{background:#0D2137;color:#fff;border:none;border-radius:5px;padding:8px 18px;font-size:11px;font-weight:500;margin-top:4px}
+.mini-tbl{width:100%;border-collapse:collapse;font-size:10px;margin-top:10px}
+.mini-tbl th{background:#f0f2f5;color:#374151;padding:5px 8px;font-weight:600;text-align:left;font-size:9px}
+.mini-tbl td{padding:5px 8px;border-bottom:0.5px solid #eee;color:#374151}
+.del-btn{background:none;border:none;color:#d03b3b;font-size:11px;cursor:pointer;padding:0}
+.panel-note{font-size:10px;color:#9ca3af;background:#f8f9fa;padding:8px 10px;border-radius:5px;margin-bottom:12px;border-left:3px solid #C8972B}
+.section-divider{font-size:10px;font-weight:600;color:#0D2137;text-transform:uppercase;letter-spacing:0.4px;margin:14px 0 8px;padding-bottom:5px;border-bottom:0.5px solid #e5e7eb}
+
+/* ── SECTION LABELS ──────────────────────────────────────── */
+.slb{display:flex;align-items:center;gap:10px;margin:6px 0 8px;padding:0 2px}
+.slb-text{font-size:9px;font-weight:700;color:#0D2137;text-transform:uppercase;letter-spacing:1.2px;white-space:nowrap;opacity:0.5}
+.slb-line{flex:1;height:1px;background:#dde1e7}
+
+/* ── TREND ARROWS ────────────────────────────────────────── */
+.kpi-trend{font-size:9px;font-weight:600;margin-top:3px;min-height:13px}
+.t-good{color:#1baf7a}
+.t-bad{color:#d03b3b}
+.t-neutral{color:#9ca3af}
+
+/* ── LAST UPDATED BAR ────────────────────────────────────── */
+.upd-bar{background:#f8f9fa;border-top:0.5px solid #e5e7eb;padding:5px 24px;display:flex;justify-content:flex-end;align-items:center;gap:16px;font-size:9px;color:#9ca3af}
+.upd-bar b{color:#0D2137}
+
+/* ── FOOTER ──────────────────────────────────────────────── */
+.footer{background:#0D2137;color:#6a8099;font-size:9px;padding:8px 24px;display:flex;justify-content:space-between;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.footer span{color:#C8972B}
+
+/* ── PRINT STYLES ────────────────────────────────────────── */
+@media print{
+  @page{size:A4 landscape;margin:5mm 7mm}
+  body{background:#fff;font-size:9px}
+  .ctrl-bar,.overlay,.no-print,.upd-bar-screen{display:none!important}
+  .body{padding:3px 5px;gap:4px}
+  .kpi-row{grid-template-columns:repeat(7,1fr);gap:3px}
+  .kpi{padding:5px 7px;border-radius:4px}
+  .kpi-value{font-size:14px}
+  .kpi-trend{font-size:7px;margin-top:1px}
+  .kpi-sub,.kpi-ctx{font-size:7px}
+  .card{padding:5px 7px;break-inside:avoid;border-radius:4px}
+  .card-title{font-size:8px;margin-bottom:4px;padding-bottom:3px}
+  .sub{font-size:7px}
+  .row2,.row3,.row-3eq,.row-full{gap:4px}
+  .header{padding:7px 12px}
+  .header h1{font-size:11px}
+  .header p{font-size:9px}
+  .slb{margin:2px 0 4px}
+  .slb-text{font-size:7px;letter-spacing:0.7px}
+  canvas{max-height:120px!important}
+  .print-break-p2{page-break-before:always;padding-top:2mm}
+  .print-break-p3{page-break-before:always;padding-top:2mm}
+  .print-page-break{display:none}
+  .print-hide{display:none!important}
+  table{font-size:8px}
+  th,td{padding:2px 5px}
+  .badge{font-size:7px;padding:1px 4px}
+  .prog-bg{height:4px}
+  .footer,.upd-bar{padding:3px 12px;font-size:7px}
+  #upd-bar-print{display:flex!important}
+  .prog-fill,.root-bar,.ind-bar-fill,
+  .kpi-gold,.kpi-red,.kpi-amber,.kpi-purple,
+  .kpi-teal,.kpi-green,.kpi-blue,
+  .t-good,.t-bad,.slb-line,
+  .header,.footer,.gold-bar{
+    -webkit-print-color-adjust:exact!important;
+    print-color-adjust:exact!important}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div>
+    <h1>Safety, Health &amp; Environment Dashboard</h1>
+    <p>IPSB Seri Iskandar &nbsp;·&nbsp; SHE-S Department</p>
+  </div>
+  <div class="hright">
+    <div class="site">InspiraPharma Sdn. Bhd.</div>
+    <div class="per" id="period-label">Reporting Period: 2018 – 2025 &nbsp;·&nbsp; All Data</div>
+  </div>
+</div>
+<div class="gold-bar"></div>
+
+<!-- CONTROL BAR -->
+<div class="ctrl-bar no-print">
+  <label>Mode</label>
+  <select class="ctrl" id="g-yearmode" onchange="toggleYearMode()">
+    <option value="single">Single Year</option>
+    <option value="range">Year Range</option>
+  </select>
+  <span id="single-year-wrap">
+    <label style="margin-left:4px">Year</label>
+    <select class="ctrl" id="g-year" onchange="applyFilters()">
+      <option value="all">All Years</option>
+    </select>
+  </span>
+  <span id="range-year-wrap" style="display:none">
+    <label style="margin-left:4px">From</label>
+    <select class="ctrl" id="g-year-from" onchange="applyFilters()"></select>
+    <label style="margin-left:4px">To</label>
+    <select class="ctrl" id="g-year-to" onchange="applyFilters()"></select>
+    <span style="font-size:9px;color:#9ca3af;margin-left:2px">· e.g. select 3 or 5-year span</span>
+  </span>
+  <label style="margin-left:8px">Department</label>
+  <select class="ctrl" id="g-dept" onchange="applyFilters()">
+    <option value="all">All Departments</option>
+    <option value="PROD">PROD</option><option value="QC">QC</option>
+    <option value="ENG">ENG</option><option value="SCM">SCM</option>
+    <option value="HRA">HRA</option><option value="SHE-S">SHE-S</option>
+    <option value="EXT">EXT</option>
+  </select>
+  <span style="font-size:9px;color:#9ca3af">· Click dept bars to highlight</span>
+  <span class="filter-tag" id="tag-year"></span>
+  <span class="filter-tag" id="tag-dept"></span>
+  <div class="ctrl-actions">
+    <span style="font-size:9px;color:#9ca3af">Data as of:</span>
+    <input type="month" id="data-as-of" class="ctrl" style="font-size:10px;padding:3px 8px" onchange="saveAsOf()">
+    <button class="btn btn-outline" onclick="exportBackup()" title="Download all dashboard data as a JSON backup file">⬇ Backup</button>
+    <label class="btn btn-outline" style="cursor:pointer" title="Restore data from a JSON backup file">⬆ Restore<input type="file" id="restore-file" accept=".json" style="display:none" onchange="restoreBackup(event)"></label>
+    <button class="btn btn-outline" onclick="openPanel()">⊕ Update Data</button>
+    <button class="btn btn-navy" onclick="window.print()">🖨 Print PDF</button>
+  </div>
+</div>
+
+<!-- BODY -->
+<div class="body">
+
+  <!-- KPI ROW -->
+  <div class="kpi-row">
+    <div class="kpi kpi-gold">
+      <div class="kpi-label">Total Incidents</div>
+      <div class="kpi-value" id="k-inc">—</div>
+      <div class="kpi-trend" id="k-inc-trend"></div>
+      <div class="kpi-sub">recorded cases</div>
+      <div class="kpi-ctx" id="k-inc-ctx"></div>
+    </div>
+    <div class="kpi kpi-red">
+      <div class="kpi-label">Lost Time Injuries</div>
+      <div class="kpi-value" id="k-lti">—</div>
+      <div class="kpi-trend" id="k-lti-trend"></div>
+      <div class="kpi-sub">LTI cases</div>
+      <div class="kpi-ctx" id="k-lti-ctx"></div>
+    </div>
+    <div class="kpi kpi-amber">
+      <div class="kpi-label">Total Lost Days</div>
+      <div class="kpi-value" id="k-days">—</div>
+      <div class="kpi-trend" id="k-days-trend"></div>
+      <div class="kpi-sub">calendar days</div>
+      <div class="kpi-ctx" id="k-days-ctx"></div>
+    </div>
+    <div class="kpi kpi-purple">
+      <div class="kpi-label">LTIFR</div>
+      <div class="kpi-value" id="k-ltifr">—</div>
+      <div class="kpi-trend" id="k-ltifr-trend"></div>
+      <div class="kpi-sub">per 1M man-hours</div>
+      <div class="kpi-ctx" id="k-ltifr-ctx"></div>
+    </div>
+    <div class="kpi kpi-teal">
+      <div class="kpi-label">Days Since Last Incident</div>
+      <div class="kpi-value" id="k-safe">—</div>
+      <div class="kpi-trend" id="k-safe-trend"></div>
+      <div class="kpi-sub" id="k-safe-sub">last incident</div>
+      <div class="kpi-ctx"></div>
+    </div>
+    <div class="kpi kpi-green">
+      <div class="kpi-label">Property Damage</div>
+      <div class="kpi-value" id="k-dmg">—</div>
+      <div class="kpi-trend" id="k-dmg-trend"></div>
+      <div class="kpi-sub">MYR total</div>
+      <div class="kpi-ctx" id="k-dmg-ctx"></div>
+    </div>
+    <div class="kpi kpi-blue">
+      <div class="kpi-label">Man-Hours Worked</div>
+      <div class="kpi-value" id="k-mh">—</div>
+      <div class="kpi-trend"></div>
+      <div class="kpi-sub" id="k-mh-sub">select year for detail</div>
+      <div class="kpi-ctx"></div>
+    </div>
+  </div>
+
+  <!-- PAGE 1: INCIDENT PERFORMANCE -->
+  <div class="slb"><div class="slb-text">Incident Performance</div><div class="slb-line"></div></div>
+
+  <div class="row2">
+    <div class="card">
+      <div class="card-title">Incidents by Year</div>
+      <div class="chart-wrap" style="height:170px"><canvas id="c-year"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Incidents by Department <span class="sub">(click bars to highlight)</span></div>
+      <div class="chart-wrap" style="height:170px"><canvas id="c-dept"></canvas></div>
+    </div>
+  </div>
+
+  <div class="row-full">
+    <div class="card">
+      <div class="card-title">Incidents by Category &amp; Year</div>
+      <div class="chart-wrap" style="height:160px"><canvas id="c-catyr"></canvas></div>
+      <div class="legend" id="catyr-legend"></div>
+    </div>
+  </div>
+
+  <!-- SEVERITY + CATEGORY + ROOT CAUSES — single row of 3 -->
+  <div class="card">
+    <div class="card-title">Severity, Category &amp; Root Causes</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;padding:4px 8px;align-items:start">
+      <div>
+        <div class="donut-label" style="font-size:10px;margin-bottom:8px">By Severity</div>
+        <div style="display:flex;align-items:center;gap:16px">
+          <div class="chart-wrap" style="height:150px;width:150px;flex-shrink:0"><canvas id="c-sev"></canvas></div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;align-items:center;gap:8px"><span style="width:11px;height:11px;border-radius:2px;background:#1baf7a;flex-shrink:0;display:inline-block"></span><span id="sev-min-lbl" style="font-size:11px;color:#374151">Minor</span></div>
+            <div style="display:flex;align-items:center;gap:8px"><span style="width:11px;height:11px;border-radius:2px;background:#eda100;flex-shrink:0;display:inline-block"></span><span id="sev-mod-lbl" style="font-size:11px;color:#374151">Moderate</span></div>
+            <div style="display:flex;align-items:center;gap:8px"><span style="width:11px;height:11px;border-radius:2px;background:#d03b3b;flex-shrink:0;display:inline-block"></span><span id="sev-maj-lbl" style="font-size:11px;color:#374151">Major</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="donut-label" style="font-size:10px;margin-bottom:8px">By Category</div>
+        <div style="display:flex;align-items:center;gap:16px">
+          <div class="chart-wrap" style="height:150px;width:150px;flex-shrink:0"><canvas id="c-cat"></canvas></div>
+          <div style="display:flex;flex-direction:column;gap:8px" id="cat-legend"></div>
+        </div>
+      </div>
+      <div>
+        <div class="donut-label" style="font-size:10px;margin-bottom:10px">Top Root Causes <span class="sub" id="rc-sub"></span></div>
+        <div class="root-list" id="root-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE 2: ANALYSIS + OPERATIONAL + PROCUREMENT -->
+  <div class="print-break-p2"></div>
+  <div class="slb"><div class="slb-text">Analysis &amp; Leading Indicators</div><div class="slb-line"></div></div>
+
+  <div class="row2">
+    <div class="card">
+      <div class="card-title">PTW Issuance <span class="sub" id="ptw-sub"></span></div>
+      <div class="ptw-summary" style="grid-template-columns:repeat(3,1fr);margin-bottom:12px">
+        <div class="ptw-stat"><div class="ptw-stat-val" id="ptw-total">—</div><div class="ptw-stat-lbl">Total Issued</div></div>
+        <div class="ptw-stat"><div class="ptw-stat-val" id="ptw-open" style="color:#d03b3b">—</div><div class="ptw-stat-lbl">Open</div></div>
+        <div class="ptw-stat"><div class="ptw-stat-val" id="ptw-closed" style="color:#1baf7a">—</div><div class="ptw-stat-lbl">Closed</div></div>
+      </div>
+      <div class="chart-wrap" style="height:210px"><canvas id="c-ptw"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Leading Indicators</div>
+      <div class="indicator-grid" style="grid-template-columns:1fr;gap:8px" id="indicators-list"></div>
+    </div>
+  </div>
+
+  <div class="slb"><div class="slb-text">Operational Tracking</div><div class="slb-line"></div></div>
+
+  <div class="row2">
+    <div class="card">
+      <div class="card-title">Gemba Tracking <span class="sub">(summary — full register on MS Lists)</span></div>
+      <div class="ptw-summary" style="grid-template-columns:repeat(3,1fr)">
+        <div class="ptw-stat"><div class="ptw-stat-val" id="gem-open" style="color:#d03b3b">—</div><div class="ptw-stat-lbl">Open Findings</div></div>
+        <div class="ptw-stat"><div class="ptw-stat-val" id="gem-closed" style="color:#1baf7a">—</div><div class="ptw-stat-lbl">Closed Findings</div></div>
+        <div class="ptw-stat"><div class="ptw-stat-val" id="gem-total" style="color:#0D2137">—</div><div class="ptw-stat-lbl">Total Findings</div></div>
+      </div>
+      <div class="section-divider" style="margin:12px 0 8px;font-size:9px">Severity Breakdown</div>
+      <div style="display:flex;flex-direction:column;gap:7px" id="gem-sev-bars"></div>
+      <div class="section-divider" style="margin:12px 0 8px;font-size:9px">Monthly Trend <span style="font-weight:400;color:#9ca3af;text-transform:none">(open vs closed)</span></div>
+      <div class="chart-wrap" style="height:110px"><canvas id="c-gemba"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">SHE-S Projects <span class="sub" id="proj-sub"></span></div>
+      <div class="prog-row" id="proj-list"></div>
+    </div>
+  </div>
+
+  <div class="slb"><div class="slb-text">Procurement &amp; Budget</div><div class="slb-line"></div></div>
+
+  <div class="card">
+    <div class="card-title">SHE-S Purchase Tracker <span class="sub" id="pur-sub"></span></div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px" id="pur-phase-summary"></div>
+    <div class="tbl-wrap">
+      <table id="pur-table">
+        <thead><tr>
+          <th>Item / Description</th>
+          <th style="text-align:center">Supplier</th>
+          <th style="text-align:center">Value (MYR)</th>
+          <th style="text-align:center">IPR</th>
+          <th style="text-align:center">PO</th>
+          <th style="text-align:center">DO</th>
+          <th style="text-align:center">GR</th>
+          <th style="text-align:center">Remarks</th>
+        </tr></thead>
+        <tbody id="pur-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">SHE-S Budget Tracker <span class="sub">OPEX &amp; CAPEX · IO Numbers</span></div>
+    <div class="row2" style="gap:16px">
+      <div>
+        <div style="font-size:10px;font-weight:600;color:#0D2137;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.4px">OPEX</div>
+        <div id="opex-budget-summary" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px"></div>
+        <div class="tbl-wrap"><table><thead><tr><th>IO No.</th><th>Description</th><th>Year</th><th style="text-align:right">Budget (MYR)</th><th style="text-align:right">Used (MYR)</th><th style="text-align:right">Balance (MYR)</th></tr></thead><tbody id="opex-body"></tbody></table></div>
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:600;color:#0D2137;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.4px">CAPEX</div>
+        <div id="capex-budget-summary" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px"></div>
+        <div class="tbl-wrap"><table><thead><tr><th>IO No.</th><th>Description</th><th>Year</th><th style="text-align:right">Budget (MYR)</th><th style="text-align:right">Used (MYR)</th><th style="text-align:right">Balance (MYR)</th></tr></thead><tbody id="capex-body"></tbody></table></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PAGE 3: COMPLIANCE + REGISTER -->
+  <div class="print-break-p3"></div>
+  <div class="slb"><div class="slb-text">Compliance &amp; Regulatory</div><div class="slb-line"></div></div>
+
+  <div class="card">
+    <div class="card-title">HIRADC Monitoring <span class="sub">9 departments · all active HIRARC documents</span></div>
+    <div class="row2" style="gap:16px">
+      <div><div class="chart-wrap" style="height:220px"><canvas id="c-hiradc"></canvas></div></div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Department</th><th style="text-align:center">High</th><th style="text-align:center">Medium</th><th style="text-align:center">Low</th><th style="text-align:center">Total</th></tr></thead>
+          <tbody id="hiradc-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="row2">
+    <div class="card">
+      <div class="card-title">Legal Compliance Monitoring <span class="sub">statutory inspection &amp; assessment validity</span></div>
+      <div class="tbl-wrap">
+        <table><thead><tr><th>Requirement</th><th>Last Conducted</th><th>Valid Until</th><th>Status</th></tr></thead><tbody id="legal-body"></tbody></table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Certificate of Fitness — DOSH Registered Machinery <span class="sub">6 machines</span></div>
+      <div class="tbl-wrap">
+        <table><thead><tr><th>Machine</th><th>Certificate No.</th><th>Expiry Date</th><th>Status</th></tr></thead><tbody id="cof-body"></tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <div class="slb"><div class="slb-text">Incident Register</div><div class="slb-line"></div></div>
+
+  <div class="card">
+    <div class="card-title">Incident Register</div>
+    <div class="filter-row no-print">
+      <label>Severity:</label>
+      <select class="filter" id="f-sev" onchange="renderTable()">
+        <option value="all">All</option><option value="MINOR">Minor</option>
+        <option value="MODERATE">Moderate</option><option value="MAJOR">Major</option>
+      </select>
+      <label style="margin-left:8px">Category:</label>
+      <select class="filter" id="f-cat" onchange="renderTable()">
+        <option value="all">All</option><option value="Injury">Injury</option>
+        <option value="Property Damage">Property Damage</option><option value="Safety">Safety</option>
+        <option value="Fire">Fire</option><option value="Security">Security</option>
+        <option value="Environmental">Environmental</option>
+      </select>
+      <span class="rowcount" id="rowcount"></span>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>ID</th><th>Date</th><th>Dept</th><th>Category</th>
+          <th>Severity</th><th>LTI Days</th><th>Damage (MYR)</th><th>Root Cause</th><th>Status</th></tr></thead>
+        <tbody id="inc-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div><!-- /body -->
+
+<div class="upd-bar no-print" id="upd-bar-el" style="display:none">
+  Data as of: <b id="upd-text">—</b> &nbsp;·&nbsp; Generated: <b id="print-date"></b>
+</div>
+<div class="upd-bar" id="upd-bar-print" style="display:none;-webkit-print-color-adjust:exact;print-color-adjust:exact">
+  Data as of: <b id="upd-text-print">—</b> &nbsp;·&nbsp; Generated: <b id="print-date-2"></b>
+</div>
+<div class="footer">
+  <span>SHE-S Department &nbsp;·&nbsp; InspiraPharma Sdn. Bhd. — IPSB Seri Iskandar</span>
+  <span style="color:#6a8099">Confidential &nbsp;·&nbsp; For Internal Use Only &nbsp;·&nbsp; <span id="print-date"></span></span>
+</div>
+
+<!-- DATA ENTRY PANEL -->
+<div class="overlay" id="overlay" onclick="if(event.target===this)closePanel()">
+  <div class="panel">
+    <div class="panel-header">
+      <h2>Update Data</h2>
+      <button class="panel-close" onclick="closePanel()">✕</button>
+    </div>
+    <div class="panel-tabs">
+      <button class="ptab active" onclick="switchTab('mh')">Man-Hours</button>
+      <button class="ptab" onclick="switchTab('ptw')">PTW</button>
+      <button class="ptab" onclick="switchTab('gemba')">Gemba</button>
+      <button class="ptab" onclick="switchTab('projects')">Projects</button>
+      <button class="ptab" onclick="switchTab('indicators')">Indicators</button>
+      <button class="ptab" onclick="switchTab('purchases')">Purchases</button>
+      <button class="ptab" onclick="switchTab('legal')">Legal Monitoring</button>
+      <button class="ptab" onclick="switchTab('cof')">Cert. of Fitness</button>
+      <button class="ptab" onclick="switchTab('hiradc')">HIRADC</button>
+      <button class="ptab" onclick="switchTab('incidents')">Incidents</button>
+    </div>
+    <div class="panel-body">
+
+      <!-- MAN-HOURS TAB -->
+      <div class="panel-section active" id="tab-mh">
+        <div class="panel-note">Add monthly man-hours. These update the Man-Hours KPI and LTIFR calculations automatically.</div>
+        <div class="form-row3">
+          <div class="form-group"><label>Month</label>
+            <select id="mh-month"><option value="1">January</option><option value="2">February</option><option value="3">March</option><option value="4">April</option><option value="5">May</option><option value="6">June</option><option value="7">July</option><option value="8">August</option><option value="9">September</option><option value="10">October</option><option value="11">November</option><option value="12">December</option></select>
+          </div>
+          <div class="form-group"><label>Year</label>
+            <input type="number" id="mh-year" value="2025" min="2018" max="2030">
+          </div>
+          <div class="form-group"><label>Total Hours</label>
+            <input type="number" id="mh-hours" placeholder="e.g. 28000">
+          </div>
+        </div>
+        <button class="form-submit" onclick="saveMH()">Save Entry</button>
+        <div class="section-divider">Existing Entries</div>
+        <table class="mini-tbl" id="mh-tbl"><thead><tr><th>Year</th><th>Month</th><th>Hours</th><th></th></tr></thead><tbody id="mh-tbl-body"></tbody></table>
+      </div>
+
+      <!-- PTW TAB -->
+      <div class="panel-section" id="tab-ptw">
+        <div class="panel-note">Record monthly PTW issuance counts. Status: Open = permit still active, Closed = work completed &amp; permit returned.</div>
+        <div class="form-row">
+          <div class="form-group"><label>Month</label>
+            <select id="ptw-month"><option value="1">January</option><option value="2">February</option><option value="3">March</option><option value="4">April</option><option value="5">May</option><option value="6">June</option><option value="7">July</option><option value="8">August</option><option value="9">September</option><option value="10">October</option><option value="11">November</option><option value="12">December</option></select>
+          </div>
+          <div class="form-group"><label>Year</label>
+            <input type="number" id="ptw-year" value="2025" min="2018" max="2030">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Permits Issued</label><input type="number" id="ptw-issued" placeholder="0"></div>
+          <div class="form-group"><label>Permits Open</label><input type="number" id="ptw-open-in" placeholder="0"></div>
+          <div class="form-group" style="grid-column:span 1"><label>Permits Closed</label><input type="number" id="ptw-closed-in" placeholder="0"></div>
+        </div>
+        <button class="form-submit" onclick="savePTW()">Save Entry</button>
+        <div class="section-divider">Existing Entries</div>
+        <table class="mini-tbl"><thead><tr><th>Year</th><th>Month</th><th>Issued</th><th>Open</th><th>Closed</th><th></th></tr></thead><tbody id="ptw-tbl-body"></tbody></table>
+      </div>
+
+      <!-- GEMBA TAB -->
+      <div class="panel-section" id="tab-gemba">
+        <div class="panel-note">Enter monthly Gemba summary figures. Detailed findings are tracked separately in the Gemba Tracking Register on Microsoft Lists — this is a high-level rollup only.</div>
+        <div class="form-row3">
+          <div class="form-group"><label>Month</label>
+            <select id="gem-month"><option value="1">January</option><option value="2">February</option><option value="3">March</option><option value="4">April</option><option value="5">May</option><option value="6">June</option><option value="7">July</option><option value="8">August</option><option value="9">September</option><option value="10">October</option><option value="11">November</option><option value="12">December</option></select>
+          </div>
+          <div class="form-group"><label>Year</label>
+            <input type="number" id="gem-year" value="2025" min="2018" max="2035">
+          </div>
+          <div class="form-group"><label>Total Findings</label>
+            <input type="number" id="gem-total-in" placeholder="0" min="0">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Open Findings</label><input type="number" id="gem-open-in" placeholder="0" min="0"></div>
+          <div class="form-group"><label>Closed Findings</label><input type="number" id="gem-closed-in" placeholder="0" min="0"></div>
+        </div>
+        <div class="section-divider" style="margin-top:14px">Severity (Cumulative, as of this update)</div>
+        <div class="form-row3">
+          <div class="form-group"><label>High</label><input type="number" id="gem-high" placeholder="0" min="0"></div>
+          <div class="form-group"><label>Medium</label><input type="number" id="gem-medium" placeholder="0" min="0"></div>
+          <div class="form-group"><label>Low</label><input type="number" id="gem-low" placeholder="0" min="0"></div>
+        </div>
+        <button class="form-submit" onclick="saveGemba()">Save Monthly Entry</button>
+        <div class="section-divider">Existing Monthly Entries</div>
+        <table class="mini-tbl"><thead><tr><th>Year</th><th>Month</th><th>Total</th><th>Open</th><th>Closed</th><th></th></tr></thead><tbody id="gem-tbl-body"></tbody></table>
+      </div>
+
+      <!-- PROJECTS TAB -->
+      <div class="panel-section" id="tab-projects">
+        <div class="panel-note">Track ongoing SHE-S projects. Update % complete regularly. Status: Planned / Active / On Hold / Completed.</div>
+        <div class="form-group"><label>Project Name</label><input type="text" id="proj-name" placeholder="e.g. HIRARC Review 2025"></div>
+        <div class="form-row">
+          <div class="form-group"><label>PIC (Dept)</label>
+            <select id="proj-dept"><option value="PROD">PROD</option><option value="QC">QC</option><option value="ENG">ENG</option><option value="SCM">SCM</option><option value="HRA">HRA</option><option value="SHE-S">SHE-S</option><option value="EXT">EXT</option></select>
+          </div>
+          <div class="form-group"><label>Status</label>
+            <select id="proj-status"><option value="Planned">Planned</option><option value="Active">Active</option><option value="On Hold">On Hold</option><option value="Completed">Completed</option></select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Start Date</label><input type="date" id="proj-start"></div>
+          <div class="form-group"><label>Target Date</label><input type="date" id="proj-target"></div>
+        </div>
+        <div class="form-group"><label>% Complete (0–100)</label><input type="number" id="proj-pct" min="0" max="100" placeholder="0"></div>
+        <button class="form-submit" onclick="saveProject()">Save Project</button>
+        <div class="section-divider">Existing Projects</div>
+        <table class="mini-tbl"><thead><tr><th>Project</th><th>PIC</th><th>Target</th><th>%</th><th>Status</th><th></th></tr></thead><tbody id="proj-tbl-body"></tbody></table>
+      </div>
+
+      <!-- INDICATORS TAB -->
+      <div class="panel-section" id="tab-indicators">
+        <div class="panel-note">Update leading indicators by year. Click a row to edit it.</div>
+
+        <div class="section-divider">Training Compliance — by Year</div>
+        <div class="form-row3" id="trn-edit-row" style="display:none;background:#f0f4ff;padding:8px;border-radius:5px;margin-bottom:8px">
+          <div class="form-group"><label>Year</label><input type="number" id="trn-year" placeholder="2025" min="2018" max="2035"></div>
+          <div class="form-group"><label>Trainings Planned</label><input type="number" id="trn-plan" placeholder="0" min="0"></div>
+          <div class="form-group"><label>Trainings Closed</label><input type="number" id="trn-done" placeholder="0" min="0"></div>
+        </div>
+        <div id="trn-edit-btns" style="display:none;margin-bottom:8px;gap:6px;display:none">
+          <button class="form-submit" onclick="saveTraining()" style="margin-right:6px">Save</button>
+          <button class="btn btn-outline" onclick="cancelEditTraining()">Cancel</button>
+        </div>
+        <button class="form-submit" id="trn-add-btn" onclick="showAddTraining()" style="margin-bottom:8px">+ Add Year</button>
+        <table class="mini-tbl" id="trn-tbl"><thead><tr><th>Year</th><th>Planned</th><th>Closed</th><th>% Done</th><th></th></tr></thead><tbody id="trn-tbl-body"></tbody></table>
+
+        <div class="section-divider" style="margin-top:14px">Inspection Completion — by Year</div>
+        <div class="form-row3" id="insp-edit-row" style="display:none;background:#f0f4ff;padding:8px;border-radius:5px;margin-bottom:8px">
+          <div class="form-group"><label>Year</label><input type="number" id="insp-year" placeholder="2025" min="2018" max="2035"></div>
+          <div class="form-group"><label>Planned</label><input type="number" id="insp-plan" placeholder="0" min="0"></div>
+          <div class="form-group"><label>Completed</label><input type="number" id="insp-done" placeholder="0" min="0"></div>
+        </div>
+        <div id="insp-edit-btns" style="display:none;margin-bottom:8px">
+          <button class="form-submit" onclick="saveInsp()" style="margin-right:6px">Save</button>
+          <button class="btn btn-outline" onclick="cancelEditInsp()">Cancel</button>
+        </div>
+        <button class="form-submit" id="insp-add-btn" onclick="showAddInsp()" style="margin-bottom:8px">+ Add Year</button>
+        <table class="mini-tbl"><thead><tr><th>Year</th><th>Planned</th><th>Completed</th><th>% Done</th><th></th></tr></thead><tbody id="insp-tbl-body"></tbody></table>
+
+        <div class="section-divider" style="margin-top:14px">CAPA Closure Rate (Trackwise) — by Year</div>
+        <div class="form-row3" id="capa-edit-row" style="display:none;background:#f0f4ff;padding:8px;border-radius:5px;margin-bottom:8px">
+          <div class="form-group"><label>Year</label><input type="number" id="capa-year" placeholder="2025" min="2018" max="2035"></div>
+          <div class="form-group"><label>Total Action Items</label><input type="number" id="capa-total" placeholder="0" min="0"></div>
+          <div class="form-group"><label>Open Items</label><input type="number" id="capa-open" placeholder="0" min="0"></div>
+        </div>
+        <div id="capa-edit-btns" style="display:none;margin-bottom:8px">
+          <button class="form-submit" onclick="saveCapa()" style="margin-right:6px">Save</button>
+          <button class="btn btn-outline" onclick="cancelEditCapa()">Cancel</button>
+        </div>
+        <button class="form-submit" id="capa-add-btn" onclick="showAddCapa()" style="margin-bottom:8px">+ Add Year</button>
+        <table class="mini-tbl"><thead><tr><th>Year</th><th>Total</th><th>Open</th><th>Closed</th><th>% Closed</th><th></th></tr></thead><tbody id="capa-tbl-body"></tbody></table>
+      </div>
+
+      <!-- PURCHASES TAB -->
+      <div class="panel-section" id="tab-purchases">
+        <div class="panel-note">Track SHE-S department purchases through all procurement phases: IPR → PO → DO → GR.</div>
+        <div class="form-group"><label>Item / Description</label><input type="text" id="pur-item" placeholder="e.g. Safety Signage (10 pcs)"></div>
+        <div class="form-row">
+          <div class="form-group"><label>Supplier</label><input type="text" id="pur-supplier" placeholder="Supplier name"></div>
+          <div class="form-group"><label>Estimated Value (MYR)</label><input type="number" id="pur-value" placeholder="0"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Current Phase</label>
+            <select id="pur-phase">
+              <option value="IPR">IPR Justification</option>
+              <option value="PO">Purchase Order</option>
+              <option value="DO">Delivery Order</option>
+              <option value="GR">Goods Receipt</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Phase Date</label><input type="date" id="pur-date"></div>
+        </div>
+        <div class="form-group"><label>Remarks (optional)</label><input type="text" id="pur-remarks" placeholder="e.g. Awaiting HOD signature"></div>
+        <button class="form-submit" onclick="savePurchase()">Save Purchase</button>
+        <div class="section-divider">Existing Purchases <span style="font-weight:400;color:#9ca3af">(click row to edit)</span></div>
+        <table class="mini-tbl"><thead><tr><th>Item</th><th>Supplier</th><th>Value (MYR)</th><th>Phase</th><th>Date</th><th></th></tr></thead><tbody id="pur-tbl-body"></tbody></table>
+
+        <div class="section-divider" style="margin-top:16px">OPEX Budget — IO Numbers</div>
+        <div class="panel-note" style="margin-bottom:8px">Track OPEX budget by IO Number. Enter actual budget received, amount used, balance auto-calculates.</div>
+        <div id="opex-edit-row" style="display:none;background:#f0f4ff;padding:8px;border-radius:5px;margin-bottom:8px">
+          <div class="form-row">
+            <div class="form-group"><label>IO Number</label><input type="text" id="opex-io" placeholder="e.g. IO-2025-001"></div>
+            <div class="form-group"><label>Description</label><input type="text" id="opex-desc" placeholder="e.g. Safety Equipment"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Year</label><input type="number" id="opex-year" placeholder="2025"></div>
+            <div class="form-group"><label>Budget (MYR)</label><input type="number" id="opex-budget" placeholder="0" min="0"></div>
+            <div class="form-group"><label>Amount Used (MYR)</label><input type="number" id="opex-used" placeholder="0" min="0"></div>
+          </div>
+          <div id="opex-edit-btns" style="margin-top:4px">
+            <button class="form-submit" onclick="saveOpex()" style="margin-right:6px">Save</button>
+            <button class="btn btn-outline" onclick="cancelEditOpex()">Cancel</button>
+          </div>
+        </div>
+        <button class="form-submit" id="opex-add-btn" onclick="showAddOpex()" style="margin-bottom:8px">+ Add IO Number</button>
+        <table class="mini-tbl"><thead><tr><th>IO No.</th><th>Description</th><th>Year</th><th>Budget (MYR)</th><th>Used (MYR)</th><th>Balance (MYR)</th><th></th></tr></thead><tbody id="opex-tbl-body"></tbody></table>
+
+        <div class="section-divider" style="margin-top:16px">CAPEX Budget — IO Numbers</div>
+        <div class="panel-note" style="margin-bottom:8px">Track CAPEX budget by IO Number. Same structure as OPEX.</div>
+        <div id="capex-edit-row" style="display:none;background:#f0f4ff;padding:8px;border-radius:5px;margin-bottom:8px">
+          <div class="form-row">
+            <div class="form-group"><label>IO Number</label><input type="text" id="capex-io" placeholder="e.g. IO-CAPEX-001"></div>
+            <div class="form-group"><label>Description</label><input type="text" id="capex-desc" placeholder="e.g. CCTV Installation"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Year</label><input type="number" id="capex-year" placeholder="2025"></div>
+            <div class="form-group"><label>Budget (MYR)</label><input type="number" id="capex-budget" placeholder="0" min="0"></div>
+            <div class="form-group"><label>Amount Used (MYR)</label><input type="number" id="capex-used" placeholder="0" min="0"></div>
+          </div>
+          <div id="capex-edit-btns" style="margin-top:4px">
+            <button class="form-submit" onclick="saveCapex()" style="margin-right:6px">Save</button>
+            <button class="btn btn-outline" onclick="cancelEditCapex()">Cancel</button>
+          </div>
+        </div>
+        <button class="form-submit" id="capex-add-btn" onclick="showAddCapex()" style="margin-bottom:8px">+ Add IO Number</button>
+        <table class="mini-tbl"><thead><tr><th>IO No.</th><th>Description</th><th>Year</th><th>Budget (MYR)</th><th>Used (MYR)</th><th>Balance (MYR)</th><th></th></tr></thead><tbody id="capex-tbl-body"></tbody></table>
+      </div>
+
+      <!-- LEGAL MONITORING TAB -->
+      <div class="panel-section" id="tab-legal">
+        <div class="panel-note">Enter the last conducted date and valid-until date for each statutory requirement. Status (Valid / Expiring Soon / Expired) calculates automatically — Expiring Soon triggers within 90 days of the valid-until date.</div>
+        <div id="legal-entries"></div>
+      </div>
+
+      <!-- CERTIFICATE OF FITNESS TAB -->
+      <div class="panel-section" id="tab-cof">
+        <div class="panel-note">Enter certificate number and expiry date for each DOSH registered machine. Status calculates automatically (Expiring Soon within 90 days of expiry).</div>
+        <div id="cof-entries"></div>
+      </div>
+
+      <!-- HIRADC TAB -->
+      <div class="panel-section" id="tab-hiradc">
+        <div class="panel-note">Update HIRADC risk activity counts per department. Changes apply immediately to the chart and table on the dashboard.</div>
+        <table class="mini-tbl" style="margin-bottom:10px">
+          <thead><tr><th>Department</th><th style="text-align:center">High</th><th style="text-align:center">Medium</th><th style="text-align:center">Low</th><th style="text-align:center">Total</th><th></th></tr></thead>
+          <tbody id="hiradc-edit-body"></tbody>
+        </table>
+        <button class="form-submit" onclick="saveHiradc()">Save All Changes</button>
+        <div style="font-size:10px;color:#9ca3af;margin-top:8px">Changes are saved to this browser. Use the ⬇ Backup button to preserve across devices.</div>
+      </div>
+
+      <!-- INCIDENTS TAB -->
+      <div class="panel-section" id="tab-incidents">
+        <div class="panel-note">Add new incident records. All fields required. Department names anonymised in output — full dept shown in register.</div>
+        <div class="form-row">
+          <div class="form-group"><label>Incident ID</label><input type="text" id="inc-id" placeholder="e.g. IIR2601"></div>
+          <div class="form-group"><label>Date</label><input type="date" id="inc-date"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Department</label>
+            <select id="inc-dept"><option value="PROD">PROD</option><option value="QC">QC</option><option value="ENG">ENG</option><option value="SCM">SCM</option><option value="HRA">HRA</option><option value="SHE-S">SHE-S</option><option value="EXT">EXT</option></select>
+          </div>
+          <div class="form-group"><label>Category</label>
+            <select id="inc-cat"><option value="Injury">Injury</option><option value="Property Damage">Property Damage</option><option value="Safety">Safety</option><option value="Fire">Fire</option><option value="Security">Security</option></select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Severity</label>
+            <select id="inc-sev"><option value="MINOR">Minor</option><option value="MODERATE">Moderate</option><option value="MAJOR">Major</option></select>
+          </div>
+          <div class="form-group"><label>LTI Days (0 if none)</label><input type="number" id="inc-lti" value="0" min="0"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Property Damage (MYR, 0 if none)</label><input type="number" id="inc-dmg" value="0" min="0"></div>
+          <div class="form-group"><label>Root Cause</label>
+            <select id="inc-rc"><option value="Inadequate training">Inadequate training</option><option value="Lack of supervision">Lack of supervision</option><option value="Damaged equipment">Damaged equipment</option><option value="Slippery floor">Slippery floor</option><option value="Unsafe act">Unsafe act</option><option value="Other">Other</option></select>
+          </div>
+        </div>
+        <button class="form-submit" onclick="saveIncident()">Save Incident</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// ── STATIC DATA ─────────────────────────────────────────────────────────────
+const STATIC_INC=[
+  {id:'IIR1801',date:'2018-03-20',dept:'PROD',cat:'Injury',sev:'MODERATE',lti:2,dmg:0,rc:'Inadequate training',desc:'PROD operator thumb got cut'},
+  {id:'IIR1802',date:'2018-06-13',dept:'EXT',cat:'Property Damage',sev:'MINOR',lti:0,dmg:3000,rc:'Lack of supervision',desc:'Accident at IPSB-SI gate'},
+  {id:'IIR1803',date:'2018-07-19',dept:'QC',cat:'Injury',sev:'MODERATE',lti:10,dmg:0,rc:'Overload of items in drawer causing damage to roller',desc:'QC staff pushed a drawer too hard causing ligament tear'},
+  {id:'IIR1901',date:'2019-01-23',dept:'QC',cat:'Safety',sev:'MODERATE',lti:0,dmg:0,rc:'Slippery floor',desc:'QC staff fell in surau'},
+  {id:'IIR1902',date:'2019-03-22',dept:'PROD',cat:'Property Damage',sev:'MINOR',lti:0,dmg:5000,rc:'Damaged trolley wheels causing unpredictable movement',desc:'PROD staff hit and broke glass door in PROD area'},
+  {id:'IIR1903',date:'2019-04-09',dept:'ENG',cat:'Safety',sev:'MINOR',lti:0,dmg:0,rc:'Gloves used were too big for the staff hands',desc:'ENG staff hand got caught in auger filler machine while servicing'},
+  {id:'IIR2001',date:'2020-02-18',dept:'PROD',cat:'Injury',sev:'MAJOR',lti:14,dmg:0,rc:'Muddy and slippery field',desc:'Victim injured left hand during Hari Sukan Rakyat Galah Panjang activity'},
+  {id:'IIR2002',date:'2020-02-18',dept:'QC',cat:'Injury',sev:'MODERATE',lti:1,dmg:0,rc:'Excessive body force during sport activity',desc:'Victim injured finger during Tarik Tali at Hari Sukan Rakyat'},
+  {id:'IIR2003',date:'2020-03-11',dept:'HRA',cat:'Injury',sev:'MODERATE',lti:2,dmg:0,rc:'Improper placement of hand while wearing shoes',desc:'ISS staff finger caught between door when colleague opened it'},
+  {id:'IIR2004',date:'2020-06-09',dept:'QC',cat:'Injury',sev:'MODERATE',lti:1,dmg:0,rc:'Intern not briefed on precautions for vial opening activity',desc:'Intern thumb punctured by vial splinter during particulate matter process'},
+  {id:'IIR2005',date:'2020-08-10',dept:'ENG',cat:'Injury',sev:'MAJOR',lti:26,dmg:0,rc:'Chemical reaction from mixture of bacteria nutrient with caustic soda',desc:'Victim burned left hand transferring Caustic Soda — accidentally mixed with bacteria nutrient'},
+  {id:'IIR2006',date:'2020-08-18',dept:'QC',cat:'Injury',sev:'MODERATE',lti:2,dmg:0,rc:'Intern not briefed on vial opening activity by PIC',desc:'Intern left palm cut by broken vial neck during de-crimping of expired Amilin Powder'},
+  {id:'IIR2101',date:'2021-04-26',dept:'QC',cat:'Fire',sev:'MINOR',lti:0,dmg:1000,rc:'Old nylon covering furnace exceeded intended use years',desc:'QC furnace caught on fire during use'},
+  {id:'IIR2102',date:'2021-08-18',dept:'QC',cat:'Safety',sev:'MINOR',lti:0,dmg:2000,rc:'Argument that led to physical altercation',desc:'2 staffs argued and caused property damage on QC discussion room wall'},
+  {id:'IIR2103',date:'2021-10-28',dept:'SCM',cat:'Property Damage',sev:'MINOR',lti:0,dmg:3000,rc:'No buddy system to notify forklift driver blindspots',desc:'Rapid roller shutter damaged by forklift'},
+  {id:'IIR2201',date:'2022-02-15',dept:'HRA',cat:'Injury',sev:'MINOR',lti:0,dmg:0,rc:'No hazard communication of sharp edges',desc:'Gardener head scratched by sharp AC external fan edge'},
+  {id:'IIR2202',date:'2022-03-08',dept:'PROD',cat:'Fire',sev:'MINOR',lti:0,dmg:0,rc:'Improper wire connection causing sparks in the machine',desc:'Fire at Blister Machine in PROD area'},
+  {id:'IIR2203',date:'2022-02-16',dept:'HRA',cat:'Property Damage',sev:'MINOR',lti:0,dmg:1000,rc:'Loose bracket fixture of the flush tank',desc:'Flush tank fell near worker'},
+  {id:'IIR2204',date:'2022-12-03',dept:'ENG',cat:'Injury',sev:'MODERATE',lti:2,dmg:0,rc:'Improper handling of sharp objects',desc:'Hand cut by protruding broken amber glass bottle in waste bag'},
+  {id:'IIR2205',date:'2022-12-08',dept:'SHE-S',cat:'Security',sev:'MINOR',lti:0,dmg:0,rc:'Blindspot covering both drivers vision',desc:'Traffic accident on way to factory at IPSB-SI gate area'},
+  {id:'IIR2301',date:'2023-05-26',dept:'SCM',cat:'Injury',sev:'MODERATE',lti:1,dmg:0,rc:'No awareness of safe work procedures',desc:'Storehand fell during transfer of finished products in Outbound C'},
+  {id:'IIR2302',date:'2023-08-12',dept:'HRA',cat:'Fire',sev:'MINOR',lti:0,dmg:700,rc:'No work instruction for weed whacker machine operations',desc:'Weed wacker machine caught on fire while in use by operator'},
+  {id:'IIR2303',date:'2023-11-08',dept:'QC',cat:'Environmental',sev:'MINOR',lti:0,dmg:500,rc:'Poor technique used during handling of chemical bottle',desc:'QC staff slipped a 4 litre methanol bottle during housekeeping'},
+  {id:'IIR2304',date:'2023-11-24',dept:'SCM',cat:'Property Damage',sev:'MINOR',lti:0,dmg:700,rc:'No buddy system causing improper fork height during FG transfer',desc:'Storehand improperly handled FG items causing damage during transfer'},
+  {id:'IIR2305',date:'2023-12-12',dept:'QC',cat:'Injury',sev:'MAJOR',lti:12,dmg:0,rc:'AHU 5 inlet positioned too low and close to ground level',desc:'6 QC staff suffered occupational poisoning symptoms from insecticide entering AHU 5'},
+  {id:'IIR2306',date:'2023-12-18',dept:'EXT',cat:'Injury',sev:'MAJOR',lti:15,dmg:800,rc:'Inadequate gap at main gate for garbage truck to enter and egress',desc:'External contractor leg wedged between garbage lorry and IPSB gate'},
+  {id:'IIR2401',date:'2024-01-21',dept:'ENG',cat:'Fire',sev:'MINOR',lti:0,dmg:700,rc:'Cable jacket not fire rated and in bad condition',desc:'Small fire from cable short circuit on AHU Machine Zone 4 PROD non-sterile plant'},
+  {id:'IIR2402',date:'2024-01-13',dept:'SCM',cat:'Property Damage',sev:'MINOR',lti:0,dmg:600,rc:'Lack of proper planning before conducting activity',desc:'Water sprinkler pipe broken during rack height adjustment in Outbound A'},
+  {id:'IIR2403',date:'2024-03-22',dept:'SCM',cat:'Property Damage',sev:'MINOR',lti:0,dmg:900,rc:'Mishandling of stacker by storehand',desc:'Full loaded pallet hit rack bar at Outbound A causing 9 cartons to be damaged'},
+  {id:'IIR2404',date:'2024-05-13',dept:'PROD',cat:'Property Damage',sev:'MODERATE',lti:1,dmg:1000,rc:'Lack of control of trolley unit causing collision with glass door',desc:'Glass door to WIP room in PROD area broken by trolley collision'},
+  {id:'IIR2405',date:'2024-06-13',dept:'QC',cat:'Security',sev:'MINOR',lti:0,dmg:0,rc:'Non-compliance to SHE/SOP-0016 vehicle inspection during exit',desc:'Traffic accident involving QC staff and contractor vehicle exiting premises'},
+  {id:'IIR2406',date:'2024-09-24',dept:'ENG',cat:'Injury',sev:'MINOR',lti:0,dmg:1000,rc:'No signage for authorised persons only at decommissioned area entrance',desc:'Staff fell into deteriorated manhole at decommissioned Sterile Production compound'},
+  {id:'IIR2501',date:'2025-07-08',dept:'ENG',cat:'Injury',sev:'MINOR',lti:0,dmg:0,rc:'Improper tools for cutting cable ties',desc:'SW handler cut hands during removal of cable tie process for TPE bags'},
+  {id:'IIR2502',date:'2025-11-25',dept:'PROD',cat:'Injury',sev:'MODERATE',lti:2,dmg:0,rc:'Vacuum transfer hose improperly positioned creating trip hazard',desc:'Operator tripped on vacuum transfer hose while transferring tabletting machine part'},
+];
+
+const STATIC_MH={
+  2023:{12:19760},
+  2024:{1:32560,2:30720,3:31840,4:31200,5:33264,6:28640,7:31648,8:31328,9:26600,10:25200,11:27360,12:26144},
+  2025:{1:27520,2:26600,3:26600,4:29400,5:27520,6:27840,7:31832,8:28896,9:27056,10:31328,11:26128,12:28000},
+  2026:{1:30240,2:26784},
+};
+
+
+// HIRADC Monitoring — editable via Update Data → HIRADC tab, persists in localStorage
+const HIRADC_DEFAULTS=[
+  {dept:'SHE-S',high:0,medium:21,low:36},
+  {dept:'ENG',high:0,medium:96,low:226},
+  {dept:'HRA',high:1,medium:16,low:107},
+  {dept:'FIT',high:0,medium:0,low:12},
+  {dept:'TS',high:0,medium:0,low:56},
+  {dept:'QA',high:0,medium:0,low:18},
+  {dept:'QC',high:0,medium:0,low:221},
+  {dept:'SCM',high:0,medium:0,low:48},
+  {dept:'PROD',high:0,medium:0,low:95},
+];
+function getHiradcData(){return load('hiradc',null)||HIRADC_DEFAULTS;}
+
+// Legal Monitoring — fixed list of statutory requirements, dates entered by user
+const LEGAL_ITEMS=[
+  {key:'lev',label:'Annual Local Exhaust Ventilation (LEV)'},
+  {key:'cem',label:'Chemical Exposure Monitoring (CEM)'},
+  {key:'chra',label:'Chemical Health Risk Assessment (CHRA)'},
+  {key:'audio',label:'Annual Audiometric Report'},
+  {key:'nra',label:'Noise Risk Assessment (NRA)'},
+  {key:'fire',label:'Fire Certificate'},
+];
+
+// Certificate of Fitness — 6 DOSH registered machines, fixed list
+const COF_MACHINES=[
+  {key:'m1',label:'Machine 1'},
+  {key:'m2',label:'Machine 2'},
+  {key:'m3',label:'Machine 3'},
+  {key:'m4',label:'Machine 4'},
+  {key:'m5',label:'Machine 5'},
+  {key:'m6',label:'Machine 6'},
+];
+
+// Status calculator: Valid / Expiring Soon (within 90 days) / Expired / Not Set
+function expiryStatus(dateStr){
+  if(!dateStr) return {label:'Not Set',cls:'b-onhold'};
+  const exp=new Date(dateStr);
+  const diffDays=Math.floor((exp-TODAY)/(864e5));
+  if(diffDays<0) return {label:'Expired',cls:'b-major'};
+  if(diffDays<=90) return {label:'Expiring Soon',cls:'b-moderate'};
+  return {label:'Valid',cls:'b-minor'};
+}
+
+// ── CONSTANTS ────────────────────────────────────────────────────────────────
+const DEPTS=['QC','PROD','SCM','HRA','ENG','EXT','SHE-S'];
+const CATS=['Injury','Property Damage','Safety','Fire','Security','Environmental'];
+const CATCOL={'Injury':'#d03b3b','Property Damage':'#eda100','Safety':'#2a78d6','Fire':'#e87ba4','Security':'#4a3aa7','Environmental':'#0e7a6a'};
+const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const TODAY=new Date(); // Live date — updates automatically each day
+
+// Dynamic year range — derived from all incident records so new years auto-appear
+function getYears(){
+  const inc=allIncidents();
+  const yrs=new Set(inc.map(i=>parseInt(i.date.slice(0,4))));
+  const min=yrs.size?Math.min(...yrs):2018;
+  const max=yrs.size?Math.max(...yrs):TODAY.getFullYear();
+  const arr=[];
+  for(let y=min;y<=max;y++) arr.push(y);
+  return arr;
+}
+
+// Rebuild year dropdown(s) and chart labels whenever data changes
+let yearMode='single';
+
+function rebuildYearSelector(){
+  const yrs=getYears();
+  const sel=document.getElementById('g-year');
+  const cur=sel.value;
+  sel.innerHTML='<option value="all">All Years ('+yrs[0]+'–'+yrs[yrs.length-1]+')</option>';
+  yrs.forEach(y=>{
+    const opt=document.createElement('option');
+    opt.value=y; opt.textContent=y;
+    if(String(y)===cur) opt.selected=true;
+    sel.appendChild(opt);
+  });
+
+  // Range dropdowns
+  const fromSel=document.getElementById('g-year-from');
+  const toSel=document.getElementById('g-year-to');
+  const curFrom=fromSel.value,curTo=toSel.value;
+  fromSel.innerHTML='';toSel.innerHTML='';
+  yrs.forEach(y=>{
+    const o1=document.createElement('option');o1.value=y;o1.textContent=y;
+    const o2=document.createElement('option');o2.value=y;o2.textContent=y;
+    fromSel.appendChild(o1);toSel.appendChild(o2);
+  });
+  fromSel.value=curFrom&&yrs.includes(parseInt(curFrom))?curFrom:yrs[0];
+  toSel.value=curTo&&yrs.includes(parseInt(curTo))?curTo:yrs[yrs.length-1];
+}
+
+function toggleYearMode(){
+  yearMode=document.getElementById('g-yearmode').value;
+  document.getElementById('single-year-wrap').style.display=yearMode==='single'?'inline':'none';
+  document.getElementById('range-year-wrap').style.display=yearMode==='range'?'inline':'none';
+  applyFilters();
+}
+
+let activeDept='all',activeYear='all';
+let chartYear,chartDept,chartCatYr,chartSev,chartCat,chartPTW,chartGemba,chartHiradc;
+
+// ── LOCAL STORAGE HELPERS ────────────────────────────────────────────────────
+function load(key,def){try{const v=localStorage.getItem(key);return v?JSON.parse(v):def;}catch{return def;}}
+function save(key,val){try{localStorage.setItem(key,JSON.stringify(val));}catch{}}
+
+function allIncidents(){return[...STATIC_INC,...load('incidents',[])].sort((a,b)=>new Date(a.date)-new Date(b.date));}
+function allMH(){
+  const base=JSON.parse(JSON.stringify(STATIC_MH));
+  const extra=load('mh',[]);
+  extra.forEach(e=>{if(!base[e.year])base[e.year]={};base[e.year][e.month]=e.hours;});
+  return base;
+}
+
+// ── MAN-HOURS CALC ───────────────────────────────────────────────────────────
+function mhTotal(yr){
+  const mh=allMH();
+  if(yr==='all') return Object.values(mh).flatMap(m=>Object.values(m)).reduce((a,b)=>a+b,0);
+  if(typeof yr==='object'){
+    let sum=0;
+    for(let y=yr.from;y<=yr.to;y++){if(mh[y])sum+=Object.values(mh[y]).reduce((a,b)=>a+b,0);}
+    return sum;
+  }
+  const d=mh[parseInt(yr)];
+  return d?Object.values(d).reduce((a,b)=>a+b,0):0;
+}
+
+function yearLabel(yr){
+  if(yr==='all') return 'All Years';
+  if(typeof yr==='object') return yr.from+'–'+yr.to;
+  return String(yr);
+}
+
+// ── FILTER ───────────────────────────────────────────────────────────────────
+function applyFilters(){
+  if(yearMode==='range'){
+    const from=parseInt(document.getElementById('g-year-from').value);
+    const to=parseInt(document.getElementById('g-year-to').value);
+    activeYear={from:Math.min(from,to),to:Math.max(from,to)};
+  } else {
+    activeYear=document.getElementById('g-year').value;
+  }
+  activeDept=document.getElementById('g-dept').value;
+  updateAll();
+}
+
+function yearMatches(dateStr){
+  if(activeYear==='all') return true;
+  const y=parseInt(dateStr.slice(0,4));
+  if(typeof activeYear==='object') return y>=activeYear.from&&y<=activeYear.to;
+  return String(y)===activeYear;
+}
+
+function getFiltered(inc){
+  return inc.filter(i=>{
+    return yearMatches(i.date)&&(activeDept==='all'||i.dept===activeDept);
+  });
+}
+
+// ── MAIN UPDATE ──────────────────────────────────────────────────────────────
+// ── TREND ARROWS ─────────────────────────────────────────────────────────────
+function setTrend(id, cur, prev, lowerIsBetter){
+  const el=document.getElementById(id);
+  if(!el) return;
+  if(prev===null||prev===undefined||isNaN(prev)||isNaN(cur)||prev===0&&cur===0){el.textContent='';return;}
+  const diff=cur-prev;
+  const pct=prev!==0?Math.abs(Math.round(diff/prev*100)):null;
+  const up=diff>0; const noChange=diff===0;
+  if(noChange){el.textContent='— No change';el.className='kpi-trend t-neutral';return;}
+  const good=lowerIsBetter?diff<0:diff>0;
+  const arrow=up?'▲':'▼';
+  const pctStr=pct!==null?` (${pct}%)`:'';
+  el.textContent=`${arrow} ${Math.abs(diff)}${pctStr} vs prev yr`;
+  el.className='kpi-trend '+(good?'t-good':'t-bad');
+}
+
+// ── LAST UPDATED ──────────────────────────────────────────────────────────────
+// ── BACKUP / RESTORE ─────────────────────────────────────────────────────────
+const BACKUP_KEYS=['mh','ptw','gemba','projects','purchases','opex','capex',
+                   'trainings','inspections','capas','incidents','legal','cof','hiradc','asOf'];
+
+function exportBackup(){
+  const out={_version:9,_exported:new Date().toISOString()};
+  BACKUP_KEYS.forEach(k=>{const v=load(k,null);if(v!==null)out[k]=v;});
+  const blob=new Blob([JSON.stringify(out,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='SHE_S_Dashboard_Backup_'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function restoreBackup(evt){
+  const file=evt.target.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const d=JSON.parse(e.target.result);
+      let count=0;
+      BACKUP_KEYS.forEach(k=>{
+        if(d[k]!==undefined&&d[k]!==null){save(k,d[k]);count++;}
+      });
+      // Restore asOf field if present
+      if(d.asOf){
+        const el=document.getElementById('data-as-of');
+        if(el) el.value=d.asOf;
+        renderAsOf(d.asOf);
+      }
+      evt.target.value='';
+      updateAll();
+      refreshPanelTables();
+      alert('✓ Backup restored — '+count+' data sets loaded.\n\nAll your PTW, Gemba, Purchases, Budget, Training, CAPA, Projects, Legal, and COF data is back.');
+    }catch(err){
+      alert('Restore failed. Please use a valid .json file exported from this dashboard.\n\nError: '+err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+function saveAsOf(){
+  const v=document.getElementById('data-as-of').value;
+  save('asOf',v||null);
+  renderAsOf(v);
+}
+function renderAsOf(v){
+  if(!v){
+    document.getElementById('upd-bar-el').style.display='none';
+    document.getElementById('upd-bar-print').style.display='none';
+    return;
+  }
+  const [y,m]=v.split('-');
+  const label=new Date(parseInt(y),parseInt(m)-1,1).toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+  document.getElementById('upd-text').textContent=label;
+  document.getElementById('upd-text-print').textContent=label;
+  document.getElementById('upd-bar-el').style.display='flex';
+  document.getElementById('upd-bar-print').style.display='flex';
+}
+
+function updateAll(){
+  rebuildYearSelector();
+  const YEARS=getYears();
+  const inc=allIncidents();
+  const filtered=getFiltered(inc);
+  const yr=activeYear,dept=activeDept;
+  const isFiltered=yr!=='all'||dept!=='all';
+
+  // Tags
+  const tagY=document.getElementById('tag-year');
+  const tagD=document.getElementById('tag-dept');
+  tagY.textContent='Year: '+yearLabel(yr); tagY.classList.toggle('active',yr!=='all');
+  tagD.textContent='Dept: '+dept; tagD.classList.toggle('active',dept!=='all');
+
+  // Period label
+  document.getElementById('period-label').textContent=
+    (yr==='all'?(YEARS[0]+' – '+YEARS[YEARS.length-1]):yearLabel(yr))+' · '+(dept==='all'?'All Departments':dept);
+
+  // KPIs — bold values reflect current filter
+  const ltiCases=filtered.filter(i=>i.lti>0).length;
+  const ltiDays=filtered.reduce((a,i)=>a+i.lti,0);
+  const dmg=filtered.reduce((a,i)=>a+i.dmg,0);
+  const mh=mhTotal(yr);
+  const ltifr=ltiCases&&mh?(ltiCases/mh*1e6):0;
+  const sorted=[...filtered].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const lastDate=sorted.length?sorted[0].date:null;
+  const daysSafe=lastDate?Math.floor((TODAY-new Date(lastDate))/(864e5)):null;
+
+  // All-time for context
+  const allLti=inc.filter(i=>i.lti>0).length;
+  const allDays=inc.reduce((a,i)=>a+i.lti,0);
+  const allDmg=inc.reduce((a,i)=>a+i.dmg,0);
+  const allMhV=mhTotal('all');
+  const allLtifr=allLti&&allMhV?(allLti/allMhV*1e6):0;
+
+  document.getElementById('k-inc').textContent=filtered.length;
+  document.getElementById('k-lti').textContent=ltiCases;
+  document.getElementById('k-days').textContent=ltiDays;
+  document.getElementById('k-ltifr').textContent=ltifr.toFixed(2);
+  document.getElementById('k-dmg').textContent=dmg.toLocaleString();
+  document.getElementById('k-mh').textContent=mh?(mh/1000).toFixed(0)+'K':'—';
+  document.getElementById('k-mh-sub').textContent=yr==='all'?'All available months':yearLabel(yr)+' total';
+
+  if(daysSafe!==null){
+    document.getElementById('k-safe').textContent=daysSafe.toLocaleString();
+    document.getElementById('k-safe-sub').textContent='Last: '+lastDate+(dept!=='all'?' ('+dept+')':'');
+  } else {
+    document.getElementById('k-safe').textContent='—';
+    document.getElementById('k-safe-sub').textContent='No incidents in filter';
+  }
+
+  if(isFiltered){
+    document.getElementById('k-inc-ctx').textContent='All-time: '+inc.length;
+    document.getElementById('k-lti-ctx').textContent='All-time: '+allLti;
+    document.getElementById('k-days-ctx').textContent='All-time: '+allDays+' days';
+    document.getElementById('k-ltifr-ctx').textContent='All-time: '+allLtifr.toFixed(2);
+    document.getElementById('k-dmg-ctx').textContent='All-time: MYR '+allDmg.toLocaleString();
+  } else {
+    ['k-inc-ctx','k-lti-ctx','k-days-ctx','k-ltifr-ctx','k-dmg-ctx'].forEach(id=>document.getElementById(id).textContent='');
+  }
+
+  // ── Trend arrows: current selected year vs previous year ──────────────────
+  const curYrNum=yr==='all'?TODAY.getFullYear():(typeof yr==='object'?yr.to:parseInt(yr));
+  const prevYrNum=curYrNum-1;
+  const curY=inc.filter(i=>parseInt(i.date.slice(0,4))===curYrNum&&(dept==='all'||i.dept===dept));
+  const preY=inc.filter(i=>parseInt(i.date.slice(0,4))===prevYrNum&&(dept==='all'||i.dept===dept));
+  setTrend('k-inc-trend',  curY.length,                          preY.length,                          true);
+  setTrend('k-lti-trend',  curY.filter(i=>i.lti>0).length,      preY.filter(i=>i.lti>0).length,       true);
+  setTrend('k-days-trend', curY.reduce((a,i)=>a+i.lti,0),       preY.reduce((a,i)=>a+i.lti,0),        true);
+  setTrend('k-dmg-trend',  curY.reduce((a,i)=>a+i.dmg,0),       preY.reduce((a,i)=>a+i.dmg,0),        true);
+  const mhC=mhTotal(String(curYrNum)),mhP=mhTotal(String(prevYrNum));
+  const ltifrC=curY.filter(i=>i.lti>0).length&&mhC?parseFloat((curY.filter(i=>i.lti>0).length/mhC*1e6).toFixed(2)):0;
+  const ltifrP=preY.filter(i=>i.lti>0).length&&mhP?parseFloat((preY.filter(i=>i.lti>0).length/mhP*1e6).toFixed(2)):0;
+  setTrend('k-ltifr-trend',ltifrC,ltifrP,true);
+  ['k-safe-trend'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent='';});
+
+  updateCharts(filtered,YEARS);
+  updatePTW();
+  updateGemba();
+  updateProjects();
+  updatePurchases();
+  updateBudget();
+  updateIndicators();
+  updateHiradc();
+  updateLegal();
+  updateCOF();
+  renderTable();
+}
+
+// ── CHARTS ───────────────────────────────────────────────────────────────────
+function updateCharts(filtered,YEARS){
+  // Year bar — labels updated dynamically in updateCharts
+  const byY={};YEARS.forEach(y=>byY[y]=0);
+  filtered.forEach(i=>byY[parseInt(i.date.slice(0,4))]++);
+  chartYear.data.labels=YEARS;
+  chartYear.data.datasets[0].data=YEARS.map(y=>byY[y]||0);
+  chartYear.update();
+
+  // Dept bar
+  const byD={};DEPTS.forEach(d=>byD[d]=0);
+  filtered.forEach(i=>byD[i.dept]=(byD[i.dept]||0)+1);
+  chartDept.data.datasets[0].data=DEPTS.map(d=>byD[d]);
+  chartDept.data.datasets[0].backgroundColor=DEPTS.map(d=>{
+    if(activeDept==='all') return '#C8972B';
+    return d===activeDept?'#C8972B':'rgba(200,151,43,0.2)';
+  });
+  chartDept.update();
+
+  // Stacked cat/year — labels updated dynamically
+  const byYC={};YEARS.forEach(y=>{byYC[y]={};CATS.forEach(c=>byYC[y][c]=0);});
+  filtered.forEach(i=>{const y=parseInt(i.date.slice(0,4));if(byYC[y])byYC[y][i.cat]++;});
+  chartCatYr.data.labels=YEARS;
+  chartCatYr.data.datasets.forEach(ds=>ds.data=YEARS.map(y=>byYC[y][ds.label]||0));
+  chartCatYr.update();
+
+  // Severity donut
+  const mn=filtered.filter(i=>i.sev==='MINOR').length;
+  const mo=filtered.filter(i=>i.sev==='MODERATE').length;
+  const mj=filtered.filter(i=>i.sev==='MAJOR').length;
+  chartSev.data.datasets[0].data=[mn,mo,mj];
+  chartSev.update();
+  document.getElementById('sev-min-lbl').textContent='Minor ('+mn+')';
+  document.getElementById('sev-mod-lbl').textContent='Moderate ('+mo+')';
+  document.getElementById('sev-maj-lbl').textContent='Major ('+mj+')';
+
+  // Category donut
+  const catCounts=CATS.map(c=>filtered.filter(i=>i.cat===c).length);
+  chartCat.data.datasets[0].data=catCounts;
+  chartCat.update();
+  document.getElementById('cat-legend').innerHTML=CATS.map((c,i)=>
+    `<div style="display:flex;align-items:center;gap:8px"><span style="width:12px;height:12px;border-radius:3px;background:${Object.values(CATCOL)[i]};flex-shrink:0;display:inline-block"></span><span style="font-size:11px;color:#374151">${c} (${catCounts[i]})</span></div>`).join('');
+
+  // Root causes
+  // Root causes — group raw text into clean professional categories
+  const RC_GROUPS={
+    'Inadequate Training / Competency':[
+      'inadequate training','not briefed','not brief','not aware','improper tools',
+      'excessive body force','improper placement','no awareness','poor technique'
+    ],
+    'Lack of Supervision / SOP Non-Compliance':[
+      'lack of supervision','no buddy system','lack of proper plan','non-compliance',
+      'no work instruction','no hazard communication','absence of any signage',
+      'no signage','mishandling','lack of control'
+    ],
+    'Equipment / Maintenance Failure':[
+      'damaged','old nylon','cable jacket','loose bracket','bad condition',
+      'overload','gloves used were too big','worn'
+    ],
+    'Unsafe Condition / Environment':[
+      'slippery','muddy','chemical reaction','positioned low','positioned too low',
+      'inadequate gap','deteriorated','unpredictable movement'
+    ],
+    'Unsafe Act / Human Error':[
+      'improper handling','argument','improper wire','improperly positioned',
+      'intern not briefed','internship students'
+    ],
+  };
+  function groupRC(rc){
+    const lower=(rc||'').toLowerCase();
+    for(const [group,keys] of Object.entries(RC_GROUPS)){
+      if(keys.some(k=>lower.includes(k))) return group;
+    }
+    return 'Other';
+  }
+  const rcGrouped={};
+  filtered.forEach(i=>{const g=groupRC(i.rc);rcGrouped[g]=(rcGrouped[g]||0)+1;});
+  const rcSorted=Object.entries(rcGrouped).sort((a,b)=>b[1]-a[1]);
+  const rcMax=rcSorted[0]?rcSorted[0][1]:1;
+  const rcColors={
+    'Inadequate Training / Competency':'#2a78d6',
+    'Lack of Supervision / SOP Non-Compliance':'#eda100',
+    'Equipment / Maintenance Failure':'#d03b3b',
+    'Unsafe Condition / Environment':'#4a3aa7',
+    'Unsafe Act / Human Error':'#e87ba4',
+    'Other':'#9ca3af'
+  };
+  document.getElementById('root-list').innerHTML=rcSorted.length
+    ?rcSorted.map(([k,v])=>`
+      <div class="root-item">
+        <div class="root-lbl" style="min-width:170px;color:${rcColors[k]||'#374151'};font-weight:500" title="${k}">${k}</div>
+        <div class="root-bar-bg"><div class="root-bar" style="width:${Math.round(v/rcMax*100)}%;background:${rcColors[k]||'#0D2137'}"></div></div>
+        <div class="root-cnt">${v}</div>
+      </div>`).join('')
+    :'<div style="font-size:10px;color:#9ca3af;padding:6px 0">No data</div>';
+  document.getElementById('rc-sub').textContent='('+filtered.length+' incidents)';
+}
+
+// ── PTW ──────────────────────────────────────────────────────────────────────
+function updatePTW(){
+  const data=load('ptw',[]);
+  const yr=activeYear;
+  let relevant;
+  if(yr==='all') relevant=data;
+  else if(typeof yr==='object') relevant=data.filter(d=>d.year>=yr.from&&d.year<=yr.to);
+  else relevant=data.filter(d=>String(d.year)===yr);
+  const total=relevant.reduce((a,d)=>a+d.issued,0);
+  const open=relevant.reduce((a,d)=>a+d.open,0);
+  const closed=relevant.reduce((a,d)=>a+d.closed,0);
+  document.getElementById('ptw-total').textContent=total||'—';
+  document.getElementById('ptw-open').textContent=open||'—';
+  document.getElementById('ptw-closed').textContent=closed||'—';
+  document.getElementById('ptw-sub').textContent=yearLabel(yr);
+
+  // Chart: show filtered months sorted chronologically (all if filter applies, last 12 if all years)
+  const sortedAll=[...data].sort((a,b)=>a.year*100+a.month-(b.year*100+b.month));
+  let chartData;
+  if(yr==='all'){
+    chartData=sortedAll.slice(-12); // last 12 months when no filter
+  } else {
+    chartData=relevant.sort((a,b)=>a.year*100+a.month-(b.year*100+b.month));
+  }
+  if(chartPTW){
+    chartPTW.data.labels=chartData.map(d=>MONTHS[d.month-1]+' '+String(d.year).slice(-2));
+    chartPTW.data.datasets[0].data=chartData.map(d=>d.issued);
+    chartPTW.update();
+  }
+}
+
+// ── PURCHASES ─────────────────────────────────────────────────────────────────
+const PHASES=['IPR','PO','DO','GR'];
+const PHASE_LABELS={'IPR':'IPR Justification','PO':'Purchase Order','DO':'Delivery Order','GR':'Goods Receipt'};
+const PHASE_COL={'IPR':'#4a3aa7','PO':'#2a78d6','DO':'#eda100','GR':'#1baf7a'};
+
+function updatePurchases(){
+  const data=load('purchases',[]);
+  document.getElementById('pur-sub').textContent=data.length+' items';
+
+  // Phase summary mini-KPIs
+  document.getElementById('pur-phase-summary').innerHTML=PHASES.map(p=>{
+    const cnt=data.filter(d=>d.phase===p).length;
+    return `<div style="background:#f8f9fa;border-radius:6px;padding:10px 12px;border-left:3px solid ${PHASE_COL[p]}">
+      <div style="font-size:9px;color:#6b7280;text-transform:uppercase;letter-spacing:0.4px;font-weight:500;margin-bottom:4px">${PHASE_LABELS[p]}</div>
+      <div style="font-size:20px;font-weight:600;color:#0D2137">${cnt}</div>
+      <div style="font-size:9px;color:#9ca3af">items</div>
+    </div>`;
+  }).join('');
+
+  const tbody=document.getElementById('pur-body');
+  if(!data.length){
+    tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:#9ca3af;font-size:10px;padding:14px">No purchases recorded. Use Update Data → Purchases to add.</td></tr>';
+    return;
+  }
+  const phaseOrder={'IPR':0,'PO':1,'DO':2,'GR':3};
+  const sorted=[...data].sort((a,b)=>phaseOrder[a.phase]-phaseOrder[b.phase]);
+  tbody.innerHTML=sorted.map(d=>{
+    const cur=phaseOrder[d.phase];
+    const ticks=PHASES.map((p,i)=>{
+      if(i<cur) return `<td style="text-align:center"><span style="color:#1baf7a;font-weight:600">✓</span></td>`;
+      if(i===cur) return `<td style="text-align:center"><span class="badge" style="background:${PHASE_COL[p]}1a;color:${PHASE_COL[p]};font-size:9px">${d.date||'Active'}</span></td>`;
+      return `<td style="text-align:center;color:#d1d5db">—</td>`;
+    }).join('');
+    return `<tr>
+      <td style="font-weight:500;color:#0D2137;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${d.item}">${d.item}</td>
+      <td style="text-align:center">${d.supplier||'—'}</td>
+      <td style="text-align:center">${d.value?Number(d.value).toLocaleString():'—'}</td>
+      ${ticks}
+      <td style="font-size:10px;color:#6b7280;text-align:center;max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${d.remarks||''}">${d.remarks||'—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+function delPurchase(i){const d=load('purchases',[]);d.splice(i,1);save('purchases',d);editPurIdx=-1;refreshPanelTables();updateAll();}
+
+// ── BUDGET (OPEX / CAPEX) ─────────────────────────────────────────────────────
+function budgetSummaryHtml(data){
+  const totalBudget=data.reduce((a,d)=>a+d.budget,0);
+  const totalUsed=data.reduce((a,d)=>a+d.used,0);
+  const totalBal=totalBudget-totalUsed;
+  const pct=totalBudget?Math.round(totalUsed/totalBudget*100):0;
+  const bc=totalBal<0?'#d03b3b':totalBal<totalBudget*0.1?'#eda100':'#1baf7a';
+  return `<div class="ptw-stat"><div class="ptw-stat-val">${totalBudget.toLocaleString()}</div><div class="ptw-stat-lbl">Total Budget (MYR)</div></div>
+    <div class="ptw-stat"><div class="ptw-stat-val" style="color:#eda100">${totalUsed.toLocaleString()}</div><div class="ptw-stat-lbl">Used (MYR)</div></div>
+    <div class="ptw-stat"><div class="ptw-stat-val" style="color:${bc}">${totalBal.toLocaleString()}</div><div class="ptw-stat-lbl">Balance · ${pct}% used</div></div>`;
+}
+function budgetRowHtml(d){
+  const bal=d.budget-d.used;
+  const bc=bal<0?'color:#d03b3b;font-weight:600':bal<d.budget*0.1?'color:#eda100;font-weight:600':'color:#1baf7a';
+  return `<tr><td style="font-weight:500">${d.io}</td><td>${d.desc||'—'}</td><td>${d.year}</td>
+    <td style="text-align:right">${d.budget.toLocaleString()}</td>
+    <td style="text-align:right;color:#eda100">${d.used.toLocaleString()}</td>
+    <td style="text-align:right;${bc}">${bal.toLocaleString()}</td></tr>`;
+}
+function updateBudget(){
+  const opex=load('opex',[]); const capex=load('capex',[]);
+  const oSum=document.getElementById('opex-budget-summary');
+  const cSum=document.getElementById('capex-budget-summary');
+  if(oSum) oSum.innerHTML=opex.length?budgetSummaryHtml(opex):'<div style="font-size:10px;color:#9ca3af;grid-column:span 3">No OPEX entries yet.</div>';
+  if(cSum) cSum.innerHTML=capex.length?budgetSummaryHtml(capex):'<div style="font-size:10px;color:#9ca3af;grid-column:span 3">No CAPEX entries yet.</div>';
+  const oB=document.getElementById('opex-body'); const cB=document.getElementById('capex-body');
+  if(oB) oB.innerHTML=opex.length?opex.map(d=>budgetRowHtml(d)).join(''):'<tr><td colspan="6" style="text-align:center;color:#9ca3af;font-size:10px;padding:10px">No OPEX entries.</td></tr>';
+  if(cB) cB.innerHTML=capex.length?capex.map(d=>budgetRowHtml(d)).join(''):'<tr><td colspan="6" style="text-align:center;color:#9ca3af;font-size:10px;padding:10px">No CAPEX entries.</td></tr>';
+}
+let editOpexIdx=-1,editCapexIdx=-1;
+function showAddOpex(idx=-1){
+  editOpexIdx=idx; const data=load('opex',[]);
+  if(idx>=0){const d=data[idx];['io','desc','year','budget','used'].forEach(f=>document.getElementById('opex-'+f).value=d[f]||'');}
+  else ['opex-io','opex-desc','opex-year','opex-budget','opex-used'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('opex-edit-row').style.display='block';
+  document.getElementById('opex-add-btn').style.display='none';
+}
+function cancelEditOpex(){document.getElementById('opex-edit-row').style.display='none';document.getElementById('opex-add-btn').style.display='inline-block';editOpexIdx=-1;}
+function saveOpex(){
+  const io=document.getElementById('opex-io').value.trim(); if(!io){alert('IO Number required.');return;}
+  const entry={io,desc:document.getElementById('opex-desc').value.trim(),year:parseInt(document.getElementById('opex-year').value)||TODAY.getFullYear(),budget:parseInt(document.getElementById('opex-budget').value)||0,used:parseInt(document.getElementById('opex-used').value)||0};
+  const data=load('opex',[]); if(editOpexIdx>=0)data[editOpexIdx]=entry; else data.push(entry);
+  save('opex',data);cancelEditOpex();refreshPanelTables();updateAll();
+}
+function delOpex(i){const d=load('opex',[]);d.splice(i,1);save('opex',d);refreshPanelTables();updateAll();}
+
+function showAddCapex(idx=-1){
+  editCapexIdx=idx; const data=load('capex',[]);
+  if(idx>=0){const d=data[idx];['io','desc','year','budget','used'].forEach(f=>document.getElementById('capex-'+f).value=d[f]||'');}
+  else ['capex-io','capex-desc','capex-year','capex-budget','capex-used'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('capex-edit-row').style.display='block';
+  document.getElementById('capex-add-btn').style.display='none';
+}
+function cancelEditCapex(){document.getElementById('capex-edit-row').style.display='none';document.getElementById('capex-add-btn').style.display='inline-block';editCapexIdx=-1;}
+function saveCapex(){
+  const io=document.getElementById('capex-io').value.trim(); if(!io){alert('IO Number required.');return;}
+  const entry={io,desc:document.getElementById('capex-desc').value.trim(),year:parseInt(document.getElementById('capex-year').value)||TODAY.getFullYear(),budget:parseInt(document.getElementById('capex-budget').value)||0,used:parseInt(document.getElementById('capex-used').value)||0};
+  const data=load('capex',[]); if(editCapexIdx>=0)data[editCapexIdx]=entry; else data.push(entry);
+  save('capex',data);cancelEditCapex();refreshPanelTables();updateAll();
+}
+function delCapex(i){const d=load('capex',[]);d.splice(i,1);save('capex',d);refreshPanelTables();updateAll();}
+
+// ── HIRADC ────────────────────────────────────────────────────────────────────
+function updateHiradc(){
+  const tbody=document.getElementById('hiradc-body');
+  if(!tbody) return;
+  const HD=getHiradcData();
+  let totH=0,totM=0,totL=0;
+  tbody.innerHTML=HD.map(d=>{
+    const t=d.high+d.medium+d.low;
+    totH+=d.high;totM+=d.medium;totL+=d.low;
+    return `<tr>
+      <td style="font-weight:500;color:#0D2137">${d.dept}</td>
+      <td style="text-align:center;color:${d.high>0?'#d03b3b':'#9ca3af'};font-weight:${d.high>0?600:400}">${d.high}</td>
+      <td style="text-align:center;color:${d.medium>0?'#c45600':'#9ca3af'}">${d.medium}</td>
+      <td style="text-align:center">${d.low}</td>
+      <td style="text-align:center;font-weight:600;color:#0D2137">${t}</td>
+    </tr>`;
+  }).join('')+
+  `<tr style="background:#f8f9fa;font-weight:600">
+    <td>Total</td>
+    <td style="text-align:center;color:#d03b3b">${totH}</td>
+    <td style="text-align:center;color:#c45600">${totM}</td>
+    <td style="text-align:center">${totL}</td>
+    <td style="text-align:center;color:#0D2137">${totH+totM+totL}</td>
+  </tr>`;
+  // Refresh chart if it exists
+  if(chartHiradc){
+    chartHiradc.data.labels=HD.map(d=>d.dept);
+    chartHiradc.data.datasets[0].data=HD.map(d=>d.high);
+    chartHiradc.data.datasets[1].data=HD.map(d=>d.medium);
+    chartHiradc.data.datasets[2].data=HD.map(d=>d.low);
+    chartHiradc.update();
+  }
+}
+
+// ── HIRADC EDIT ───────────────────────────────────────────────────────────────
+function refreshHiradcForm(){
+  const el=document.getElementById('hiradc-edit-body');
+  if(!el) return;
+  const HD=getHiradcData();
+  el.innerHTML=HD.map((d,i)=>`
+    <tr>
+      <td style="font-weight:500;color:#0D2137">${d.dept}</td>
+      <td style="text-align:center"><input type="number" id="hiradc-${i}-high" value="${d.high}" min="0" style="width:55px;border:0.5px solid #d1d5db;border-radius:3px;padding:2px 4px;text-align:center;font-size:10px"></td>
+      <td style="text-align:center"><input type="number" id="hiradc-${i}-med" value="${d.medium}" min="0" style="width:55px;border:0.5px solid #d1d5db;border-radius:3px;padding:2px 4px;text-align:center;font-size:10px"></td>
+      <td style="text-align:center"><input type="number" id="hiradc-${i}-low" value="${d.low}" min="0" style="width:55px;border:0.5px solid #d1d5db;border-radius:3px;padding:2px 4px;text-align:center;font-size:10px"></td>
+      <td style="text-align:center;font-size:10px;color:#9ca3af" id="hiradc-${i}-tot">${d.high+d.medium+d.low}</td>
+      <td></td>
+    </tr>`).join('');
+  // Live total update
+  HD.forEach((_,i)=>{
+    ['high','med','low'].forEach(f=>{
+      const el2=document.getElementById(`hiradc-${i}-${f}`);
+      if(el2) el2.addEventListener('input',()=>{
+        const h=parseInt(document.getElementById(`hiradc-${i}-high`).value)||0;
+        const m=parseInt(document.getElementById(`hiradc-${i}-med`).value)||0;
+        const l=parseInt(document.getElementById(`hiradc-${i}-low`).value)||0;
+        const t=document.getElementById(`hiradc-${i}-tot`);
+        if(t) t.textContent=h+m+l;
+      });
+    });
+  });
+}
+
+function saveHiradc(){
+  const HD=getHiradcData();
+  const updated=HD.map((d,i)=>({
+    dept:d.dept,
+    high:parseInt(document.getElementById(`hiradc-${i}-high`).value)||0,
+    medium:parseInt(document.getElementById(`hiradc-${i}-med`).value)||0,
+    low:parseInt(document.getElementById(`hiradc-${i}-low`).value)||0
+  }));
+  save('hiradc',updated);
+  updateHiradc();
+  alert('HIRADC data saved successfully.');
+}
+
+// ── LEGAL MONITORING ──────────────────────────────────────────────────────────
+function updateLegal(){
+  const tbody=document.getElementById('legal-body');
+  if(!tbody) return;
+  const data=load('legal',{});
+  tbody.innerHTML=LEGAL_ITEMS.map(it=>{
+    const rec=data[it.key]||{};
+    const st=expiryStatus(rec.validUntil);
+    return `<tr>
+      <td style="font-weight:500;color:#0D2137">${it.label}</td>
+      <td>${rec.lastDone||'—'}</td>
+      <td>${rec.validUntil||'—'}</td>
+      <td><span class="badge ${st.cls}">${st.label}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function refreshLegalForm(){
+  const el=document.getElementById('legal-entries');
+  if(!el) return;
+  const data=load('legal',{});
+  el.innerHTML=LEGAL_ITEMS.map(it=>{
+    const rec=data[it.key]||{lastDone:'',validUntil:''};
+    return `
+    <div class="section-divider" style="margin-top:10px">${it.label}</div>
+    <div class="form-row">
+      <div class="form-group"><label>Last Conducted</label><input type="date" id="legal-${it.key}-done" value="${rec.lastDone||''}" onchange="saveLegal('${it.key}')"></div>
+      <div class="form-group"><label>Valid Until</label><input type="date" id="legal-${it.key}-valid" value="${rec.validUntil||''}" onchange="saveLegal('${it.key}')"></div>
+    </div>`;
+  }).join('');
+}
+
+function saveLegal(key){
+  const data=load('legal',{});
+  data[key]={
+    lastDone:document.getElementById('legal-'+key+'-done').value,
+    validUntil:document.getElementById('legal-'+key+'-valid').value
+  };
+  save('legal',data);
+  updateAll();
+}
+
+// ── CERTIFICATE OF FITNESS ───────────────────────────────────────────────────
+function updateCOF(){
+  const tbody=document.getElementById('cof-body');
+  if(!tbody) return;
+  const data=load('cof',{});
+  tbody.innerHTML=COF_MACHINES.map(m=>{
+    const rec=data[m.key]||{};
+    const st=expiryStatus(rec.expiry);
+    return `<tr>
+      <td style="font-weight:500;color:#0D2137">${rec.name||m.label}</td>
+      <td>${rec.certNo||'—'}</td>
+      <td>${rec.expiry||'—'}</td>
+      <td><span class="badge ${st.cls}">${st.label}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function refreshCOFForm(){
+  const el=document.getElementById('cof-entries');
+  if(!el) return;
+  const data=load('cof',{});
+  el.innerHTML=COF_MACHINES.map((m,idx)=>{
+    const rec=data[m.key]||{name:'',certNo:'',expiry:''};
+    return `
+    <div class="section-divider" style="margin-top:10px">Machine ${idx+1}</div>
+    <div class="form-row3">
+      <div class="form-group"><label>Machine Name</label><input type="text" id="cof-${m.key}-name" value="${rec.name||''}" placeholder="e.g. Air Compressor" onchange="saveCOF('${m.key}')"></div>
+      <div class="form-group"><label>Certificate No.</label><input type="text" id="cof-${m.key}-cert" value="${rec.certNo||''}" placeholder="e.g. PMT/1234/2025" onchange="saveCOF('${m.key}')"></div>
+      <div class="form-group"><label>Expiry Date</label><input type="date" id="cof-${m.key}-expiry" value="${rec.expiry||''}" onchange="saveCOF('${m.key}')"></div>
+    </div>`;
+  }).join('');
+}
+
+function saveCOF(key){
+  const data=load('cof',{});
+  data[key]={
+    name:document.getElementById('cof-'+key+'-name').value,
+    certNo:document.getElementById('cof-'+key+'-cert').value,
+    expiry:document.getElementById('cof-'+key+'-expiry').value
+  };
+  save('cof',data);
+  updateAll();
+}
+
+// ── GEMBA ─────────────────────────────────────────────────────────────────────
+function updateGemba(){
+  const data=load('gemba',[]);
+  const sorted=[...data].sort((a,b)=>(a.year*100+a.month)-(b.year*100+b.month));
+
+  // Sum ALL months for the headline totals
+  const totalOpen=data.reduce((a,d)=>a+(d.open||0),0);
+  const totalClosed=data.reduce((a,d)=>a+(d.closed||0),0);
+  const totalAll=data.reduce((a,d)=>a+(d.total||0),0);
+
+  document.getElementById('gem-open').textContent=data.length?totalOpen:'—';
+  document.getElementById('gem-closed').textContent=data.length?totalClosed:'—';
+  document.getElementById('gem-total').textContent=data.length?totalAll:'—';
+
+  // Severity bars — sum across all months
+  const sevEl=document.getElementById('gem-sev-bars');
+  if(data.length){
+    const sevData=[
+      {label:'High',val:data.reduce((a,d)=>a+(d.high||0),0),color:'#d03b3b'},
+      {label:'Medium',val:data.reduce((a,d)=>a+(d.medium||0),0),color:'#eda100'},
+      {label:'Low',val:data.reduce((a,d)=>a+(d.low||0),0),color:'#1baf7a'}
+    ];
+    const max=Math.max(...sevData.map(s=>s.val),1);
+    sevEl.innerHTML=sevData.map(s=>`
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="font-size:10px;color:#374151;min-width:50px">${s.label}</div>
+        <div class="root-bar-bg" style="flex:1"><div class="root-bar" style="width:${Math.round(s.val/max*100)}%;background:${s.color}"></div></div>
+        <div style="font-size:10px;color:#6b7280;min-width:20px;text-align:right">${s.val}</div>
+      </div>`).join('');
+  } else {
+    sevEl.innerHTML='<div style="font-size:10px;color:#9ca3af">No data yet — add a monthly entry.</div>';
+  }
+
+  // Monthly trend chart
+  if(chartGemba){
+    chartGemba.data.labels=sorted.map(d=>MONTHS[d.month-1]+' '+String(d.year).slice(-2));
+    chartGemba.data.datasets[0].data=sorted.map(d=>d.open);
+    chartGemba.data.datasets[1].data=sorted.map(d=>d.closed);
+    chartGemba.update();
+  }
+}
+
+// ── PROJECTS ─────────────────────────────────────────────────────────────────
+function updateProjects(){
+  const data=load('projects',[]);
+  const el=document.getElementById('proj-list');
+  const active=data.filter(d=>d.status==='Active').length;
+  document.getElementById('proj-sub').textContent=data.length+' projects · '+active+' active';
+  if(!data.length){
+    el.innerHTML='<div style="font-size:10px;color:#9ca3af;padding:8px 0">No projects recorded. Use Update Data to add.</div>';
+    return;
+  }
+  const colMap={'Planned':'#3949ab','Active':'#1565c0','On Hold':'#6b7280','Completed':'#2e7d32'};
+  const fillMap={'Planned':'#e8eaf6','Active':'#2a78d6','On Hold':'#9ca3af','Completed':'#1baf7a'};
+  el.innerHTML=data.map(d=>`
+    <div class="prog-item">
+      <div class="prog-header">
+        <span>${d.name} <span style="color:#9ca3af;font-size:9px">[${d.dept}]</span></span>
+        <span class="prog-pct">${d.pct}%</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:9px;color:#9ca3af;margin-bottom:2px">
+        <span>Target: ${d.target||'—'}</span>
+        <span class="badge" style="background:${colMap[d.status]}1a;color:${colMap[d.status]}">${d.status}</span>
+      </div>
+      <div class="prog-bg"><div class="prog-fill" style="width:${d.pct}%;background:${fillMap[d.status]}"></div></div>
+    </div>`).join('');
+}
+
+// ── INDICATORS ────────────────────────────────────────────────────────────────
+function updateIndicators(){
+  const trainings=load('trainings',[]);
+  const insps=load('inspections',[]);
+  const capas=load('capas',[]);
+
+  // Use current year filter or latest year available
+  const curYr=activeYear==='all'?null:(typeof activeYear==='object'?activeYear.to:parseInt(activeYear));
+
+  function latestOrYear(arr){
+    if(!arr.length) return null;
+    if(curYr){const r=arr.find(a=>a.year===curYr);return r||arr[arr.length-1];}
+    return arr[arr.length-1];
+  }
+
+  const trn=latestOrYear([...trainings].sort((a,b)=>a.year-b.year));
+  const ins=latestOrYear([...insps].sort((a,b)=>a.year-b.year));
+  const cap=latestOrYear([...capas].sort((a,b)=>a.year-b.year));
+
+  const tPct=trn&&trn.plan?Math.round(trn.done/trn.plan*100):0;
+  const iPct=ins&&ins.plan?Math.round(ins.done/ins.plan*100):0;
+  const capClosed=cap?cap.total-cap.open:0;
+  const cPct=cap&&cap.total?Math.round(capClosed/cap.total*100):0;
+
+  const items=[
+    {label:'Training Compliance',val:tPct,target:100,color:'#2a78d6',
+     sub:trn?(trn.done+' closed of '+trn.plan+' planned ('+trn.year+')'):'No data'},
+    {label:'Inspection Completion',val:iPct,target:100,color:'#1baf7a',
+     sub:ins?(ins.done+'/'+ins.plan+' completed ('+ins.year+')'):'No data'},
+    {label:'CAPA Closure Rate (Trackwise)',val:cPct,target:80,color:'#C8972B',
+     sub:cap?(capClosed+' closed · '+cap.open+' open of '+cap.total+' total ('+cap.year+')'):'No data'},
+  ];
+  document.getElementById('indicators-list').innerHTML=items.map(it=>`
+    <div class="ind-card">
+      <div class="ind-title">${it.label}</div>
+      <div style="display:flex;align-items:baseline;gap:6px">
+        <div class="ind-val">${it.val}%</div>
+        <div style="font-size:9px;color:#9ca3af">target ${it.target}%</div>
+      </div>
+      <div style="font-size:9px;color:#9ca3af;margin-top:1px">${it.sub}</div>
+      <div class="ind-bar-bg"><div class="ind-bar-fill" style="width:${Math.min(it.val,100)}%;background:${it.val>=it.target?it.color:'#d03b3b'}"></div></div>
+    </div>`).join('');
+}
+
+// Training CRUD
+let editTrnIdx=-1;
+function showAddTraining(idx=-1){
+  editTrnIdx=idx;
+  const data=load('trainings',[]);
+  const row=document.getElementById('trn-edit-row');
+  const btns=document.getElementById('trn-edit-btns');
+  if(idx>=0){
+    document.getElementById('trn-year').value=data[idx].year||'';
+    document.getElementById('trn-plan').value=data[idx].plan||0;
+    document.getElementById('trn-done').value=data[idx].done||0;
+  } else {
+    document.getElementById('trn-year').value='';
+    document.getElementById('trn-plan').value='';
+    document.getElementById('trn-done').value='';
+  }
+  row.style.display='grid'; btns.style.display='flex';
+  document.getElementById('trn-add-btn').style.display='none';
+}
+function cancelEditTraining(){
+  document.getElementById('trn-edit-row').style.display='none';
+  document.getElementById('trn-edit-btns').style.display='none';
+  document.getElementById('trn-add-btn').style.display='inline-block';
+  editTrnIdx=-1;
+}
+function saveTraining(){
+  const yr=parseInt(document.getElementById('trn-year').value);
+  if(!yr){alert('Please enter a year.');return;}
+  const entry={year:yr,plan:parseInt(document.getElementById('trn-plan').value)||0,done:parseInt(document.getElementById('trn-done').value)||0};
+  const data=load('trainings',[]);
+  if(editTrnIdx>=0) data[editTrnIdx]=entry;
+  else {const ei=data.findIndex(d=>d.year===yr);if(ei>=0)data[ei]=entry;else data.push(entry);}
+  data.sort((a,b)=>a.year-b.year);
+  save('trainings',data);cancelEditTraining();refreshPanelTables();updateAll();
+}
+function delTraining(i){const d=load('trainings',[]);d.splice(i,1);save('trainings',d);refreshPanelTables();updateAll();}
+
+// Inspection CRUD
+let editInspIdx=-1;
+function showAddInsp(idx=-1){
+  editInspIdx=idx;
+  const data=load('inspections',[]);
+  if(idx>=0){
+    document.getElementById('insp-year').value=data[idx].year||'';
+    document.getElementById('insp-plan').value=data[idx].plan||0;
+    document.getElementById('insp-done').value=data[idx].done||0;
+  } else {
+    document.getElementById('insp-year').value='';
+    document.getElementById('insp-plan').value='';
+    document.getElementById('insp-done').value='';
+  }
+  document.getElementById('insp-edit-row').style.display='grid';
+  document.getElementById('insp-edit-btns').style.display='flex';
+  document.getElementById('insp-add-btn').style.display='none';
+}
+function cancelEditInsp(){
+  document.getElementById('insp-edit-row').style.display='none';
+  document.getElementById('insp-edit-btns').style.display='none';
+  document.getElementById('insp-add-btn').style.display='inline-block';
+  editInspIdx=-1;
+}
+function saveInsp(){
+  const yr=parseInt(document.getElementById('insp-year').value);
+  if(!yr){alert('Please enter a year.');return;}
+  const entry={year:yr,plan:parseInt(document.getElementById('insp-plan').value)||0,done:parseInt(document.getElementById('insp-done').value)||0};
+  const data=load('inspections',[]);
+  if(editInspIdx>=0) data[editInspIdx]=entry;
+  else {const ei=data.findIndex(d=>d.year===yr);if(ei>=0)data[ei]=entry;else data.push(entry);}
+  data.sort((a,b)=>a.year-b.year);
+  save('inspections',data);cancelEditInsp();refreshPanelTables();updateAll();
+}
+function delInsp(i){const d=load('inspections',[]);d.splice(i,1);save('inspections',d);refreshPanelTables();updateAll();}
+
+// CAPA CRUD
+let editCapaIdx=-1;
+function showAddCapa(idx=-1){
+  editCapaIdx=idx;
+  const data=load('capas',[]);
+  if(idx>=0){
+    document.getElementById('capa-year').value=data[idx].year||'';
+    document.getElementById('capa-total').value=data[idx].total||0;
+    document.getElementById('capa-open').value=data[idx].open||0;
+  } else {
+    document.getElementById('capa-year').value='';
+    document.getElementById('capa-total').value='';
+    document.getElementById('capa-open').value='';
+  }
+  document.getElementById('capa-edit-row').style.display='grid';
+  document.getElementById('capa-edit-btns').style.display='flex';
+  document.getElementById('capa-add-btn').style.display='inline-block';
+}
+function cancelEditCapa(){
+  document.getElementById('capa-edit-row').style.display='none';
+  document.getElementById('capa-edit-btns').style.display='none';
+  editCapaIdx=-1;
+}
+function saveCapa(){
+  const yr=parseInt(document.getElementById('capa-year').value);
+  if(!yr){alert('Please enter a year.');return;}
+  const total=parseInt(document.getElementById('capa-total').value)||0;
+  const open=parseInt(document.getElementById('capa-open').value)||0;
+  const entry={year:yr,total,open};
+  const data=load('capas',[]);
+  if(editCapaIdx>=0) data[editCapaIdx]=entry;
+  else {const ei=data.findIndex(d=>d.year===yr);if(ei>=0)data[ei]=entry;else data.push(entry);}
+  data.sort((a,b)=>a.year-b.year);
+  save('capas',data);cancelEditCapa();refreshPanelTables();updateAll();
+}
+function delCapa(i){const d=load('capas',[]);d.splice(i,1);save('capas',d);refreshPanelTables();updateAll();}
+
+// ── INCIDENT TABLE ────────────────────────────────────────────────────────────
+function renderTable(){
+  const inc=allIncidents();
+  const dept=activeDept;
+  const sv=document.getElementById('f-sev').value;
+  const ct=document.getElementById('f-cat').value;
+  const data=inc.filter(i=>{
+    return yearMatches(i.date)
+        &&(dept==='all'||i.dept===dept)
+        &&(sv==='all'||i.sev===sv)
+        &&(ct==='all'||i.cat===ct);
+  });
+  const tbody=document.getElementById('inc-body');
+  tbody.innerHTML='';
+  [...data].reverse().forEach(i=>{
+    const sc=i.sev==='MINOR'?'b-minor':i.sev==='MODERATE'?'b-moderate':'b-major';
+    const sl=i.sev.charAt(0)+i.sev.slice(1).toLowerCase();
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td style="font-weight:600;color:#0D2137;font-size:10px">${i.id}</td>
+      <td>${i.date}</td><td>${i.dept}</td><td>${i.cat}</td>
+      <td><span class="badge ${sc}">${sl}</span></td>
+      <td style="text-align:center">${i.lti>0?i.lti:'—'}</td>
+      <td style="text-align:right">${i.dmg>0?i.dmg.toLocaleString():'—'}</td>
+      <td style="font-size:10px;color:#6b7280;max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${i.rc}</td>
+      <td class="badge b-closed">Closed</td>`;
+    tbody.appendChild(tr);
+  });
+  const rc=document.getElementById('rowcount');
+  if(rc) rc.textContent='Showing '+data.length+' of '+inc.length+' records';
+}
+
+// ── DATA PANEL ────────────────────────────────────────────────────────────────
+function openPanel(){document.getElementById('overlay').classList.add('open');refreshPanelTables();}
+function closePanel(){document.getElementById('overlay').classList.remove('open');}
+
+function switchTab(name){
+  document.querySelectorAll('.ptab').forEach((t,i)=>{
+    const tabs=['mh','ptw','gemba','projects','indicators','purchases','legal','cof','hiradc','incidents'];
+    t.classList.toggle('active',tabs[i]===name);
+  });
+  document.querySelectorAll('.panel-section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  refreshPanelTables();
+}
+
+// ── EDITABLE TABLE HELPER ─────────────────────────────────────────────────────
+// Renders a mini-table where clicking a row highlights it and shows Edit/Delete buttons
+function editableTable(tbody, rows, editFn, delFn, emptyMsg){
+  if(!tbody) return;
+  if(!rows.length){tbody.innerHTML=`<tr><td colspan="99" style="color:#9ca3af;text-align:center;padding:8px">${emptyMsg}</td></tr>`;return;}
+  tbody.innerHTML='';
+  rows.forEach((cells,i)=>{
+    const tr=document.createElement('tr');
+    tr.style.cursor='pointer';
+    tr.innerHTML=cells.map(c=>`<td>${c}</td>`).join('');
+    // Action cell
+    const td=document.createElement('td');
+    td.style.whiteSpace='nowrap';
+    const editBtn=document.createElement('button');
+    editBtn.className='btn btn-outline';editBtn.textContent='Edit';editBtn.style.cssText='font-size:9px;padding:2px 7px;margin-right:4px;display:none';
+    const delBtn=document.createElement('button');
+    delBtn.className='del-btn';delBtn.textContent='✕';delBtn.style.display='none';
+    editBtn.onclick=(e)=>{e.stopPropagation();editFn(i);};
+    delBtn.onclick=(e)=>{e.stopPropagation();if(confirm('Delete this entry?'))delFn(i);};
+    td.appendChild(editBtn);td.appendChild(delBtn);tr.appendChild(td);
+    tr.onclick=()=>{
+      // deselect all rows in same tbody
+      [...tbody.querySelectorAll('tr')].forEach(r=>{
+        r.style.background='';
+        r.querySelectorAll('button').forEach(b=>b.style.display='none');
+      });
+      tr.style.background='#f0f4ff';
+      editBtn.style.display='inline-block';delBtn.style.display='inline-block';
+    };
+    tbody.appendChild(tr);
+  });
+}
+
+function refreshPanelTables(){
+  // MH table
+  const mhData=load('mh',[]).sort((a,b)=>a.year*100+a.month-(b.year*100+b.month));
+  editableTable(document.getElementById('mh-tbl-body'),
+    mhData.map(e=>[e.year,MONTHS[e.month-1],e.hours.toLocaleString()]),
+    (i)=>{const e=mhData[i];document.getElementById('mh-year').value=e.year;document.getElementById('mh-month').value=e.month;document.getElementById('mh-hours').value=e.hours;},
+    (i)=>delMH(load('mh',[]).findIndex(e=>e.year===mhData[i].year&&e.month===mhData[i].month)),
+    'No entries yet');
+
+  // PTW table
+  const ptwData=load('ptw',[]).sort((a,b)=>a.year*100+a.month-(b.year*100+b.month));
+  editableTable(document.getElementById('ptw-tbl-body'),
+    ptwData.map(e=>[e.year,MONTHS[e.month-1],e.issued,e.open,e.closed]),
+    (i)=>{const e=ptwData[i];document.getElementById('ptw-year').value=e.year;document.getElementById('ptw-month').value=e.month;document.getElementById('ptw-issued').value=e.issued;document.getElementById('ptw-open-in').value=e.open;document.getElementById('ptw-closed-in').value=e.closed;},
+    (i)=>delPTW(load('ptw',[]).findIndex(e=>e.year===ptwData[i].year&&e.month===ptwData[i].month)),
+    'No entries yet');
+
+  // Gemba table
+  const gemData=[...load('gemba',[])].sort((a,b)=>a.year*100+a.month-(b.year*100+b.month));
+  editableTable(document.getElementById('gem-tbl-body'),
+    gemData.map(e=>[e.year,MONTHS[e.month-1],e.total,e.open,e.closed,`H:${e.high} M:${e.medium} L:${e.low}`]),
+    (i)=>{const e=gemData[i];document.getElementById('gem-year').value=e.year;document.getElementById('gem-month').value=e.month;document.getElementById('gem-total-in').value=e.total;document.getElementById('gem-open-in').value=e.open;document.getElementById('gem-closed-in').value=e.closed;document.getElementById('gem-high').value=e.high;document.getElementById('gem-medium').value=e.medium;document.getElementById('gem-low').value=e.low;},
+    (i)=>delGemba(load('gemba',[]).findIndex(e=>e.year===gemData[i].year&&e.month===gemData[i].month)),
+    'No entries yet');
+
+  // Projects table
+  const projData=load('projects',[]);
+  editableTable(document.getElementById('proj-tbl-body'),
+    projData.map(e=>[e.name,e.dept,e.target||'—',e.pct+'%',e.status]),
+    (i)=>{const e=projData[i];document.getElementById('proj-name').value=e.name;document.getElementById('proj-dept').value=e.dept;document.getElementById('proj-status').value=e.status;document.getElementById('proj-start').value=e.start||'';document.getElementById('proj-target').value=e.target||'';document.getElementById('proj-pct').value=e.pct;editProjIdx=i;},
+    (i)=>delProject(i), 'No projects yet');
+
+  // Purchases table
+  const purData=load('purchases',[]);
+  const purTbl=document.getElementById('pur-tbl-body');
+  editableTable(purTbl,
+    purData.map(e=>[e.item,e.supplier||'—',e.value?Number(e.value).toLocaleString():'—',e.phase,e.date||'—']),
+    (i)=>{const e=purData[i];document.getElementById('pur-item').value=e.item;document.getElementById('pur-supplier').value=e.supplier||'';document.getElementById('pur-value').value=e.value||'';document.getElementById('pur-phase').value=e.phase;document.getElementById('pur-date').value=e.date||'';document.getElementById('pur-remarks').value=e.remarks||'';editPurIdx=i;},
+    (i)=>delPurchase(i), 'No purchases yet');
+
+  // OPEX / CAPEX tables
+  const opexData=load('opex',[]);
+  const capexData=load('capex',[]);
+  const budgetCols=d=>[d.io,d.desc||'—',d.year,d.budget.toLocaleString(),d.used.toLocaleString(),(d.budget-d.used).toLocaleString()];
+  editableTable(document.getElementById('opex-tbl-body'),opexData.map(budgetCols),
+    (i)=>showAddOpex(i),(i)=>delOpex(i),'No OPEX entries yet');
+  editableTable(document.getElementById('capex-tbl-body'),capexData.map(budgetCols),
+    (i)=>showAddCapex(i),(i)=>delCapex(i),'No CAPEX entries yet');
+
+  // Indicators — Training
+  const trnData=load('trainings',[]).sort((a,b)=>a.year-b.year);
+  editableTable(document.getElementById('trn-tbl-body'),
+    trnData.map(t=>[t.year,t.plan,t.done,t.plan?Math.round(t.done/t.plan*100)+'%':'—']),
+    (i)=>showAddTraining(i),(i)=>delTraining(i),'No training entries yet');
+
+  // Indicators — Inspections
+  const inspData=load('inspections',[]).sort((a,b)=>a.year-b.year);
+  editableTable(document.getElementById('insp-tbl-body'),
+    inspData.map(t=>[t.year,t.plan,t.done,t.plan?Math.round(t.done/t.plan*100)+'%':'—']),
+    (i)=>showAddInsp(i),(i)=>delInsp(i),'No inspection entries yet');
+
+  // Indicators — CAPA
+  const capaData=load('capas',[]).sort((a,b)=>a.year-b.year);
+  editableTable(document.getElementById('capa-tbl-body'),
+    capaData.map(t=>[t.year,t.total,t.open,t.total-t.open,t.total?Math.round((t.total-t.open)/t.total*100)+'%':'—']),
+    (i)=>showAddCapa(i),(i)=>delCapa(i),'No CAPA entries yet');
+
+  refreshLegalForm();
+  refreshCOFForm();
+  refreshHiradcForm();
+}
+
+// Edit index trackers for forms that append vs update
+let editProjIdx=-1, editPurIdx=-1;
+
+function saveMH(){
+  const m=parseInt(document.getElementById('mh-month').value);
+  const y=parseInt(document.getElementById('mh-year').value);
+  const h=parseInt(document.getElementById('mh-hours').value);
+  if(!h||!y){alert('Please fill all fields.');return;}
+  const data=load('mh',[]);
+  const idx=data.findIndex(e=>e.year===y&&e.month===m);
+  if(idx>=0)data[idx].hours=h; else data.push({year:y,month:m,hours:h});
+  save('mh',data);refreshPanelTables();updateAll();
+}
+function delMH(i){const d=load('mh',[]);d.splice(i,1);save('mh',d);refreshPanelTables();updateAll();}
+
+function savePTW(){
+  const m=parseInt(document.getElementById('ptw-month').value);
+  const y=parseInt(document.getElementById('ptw-year').value);
+  const issued=parseInt(document.getElementById('ptw-issued').value)||0;
+  const open=parseInt(document.getElementById('ptw-open-in').value)||0;
+  const closed=parseInt(document.getElementById('ptw-closed-in').value)||0;
+  const data=load('ptw',[]);
+  const idx=data.findIndex(e=>e.year===y&&e.month===m);
+  const entry={year:y,month:m,issued,open,closed};
+  if(idx>=0)data[idx]=entry; else data.push(entry);
+  data.sort((a,b)=>a.year*100+a.month-(b.year*100+b.month));
+  save('ptw',data);refreshPanelTables();updateAll();
+}
+function delPTW(i){const d=load('ptw',[]);d.splice(i,1);save('ptw',d);refreshPanelTables();updateAll();}
+
+function saveGemba(){
+  const m=parseInt(document.getElementById('gem-month').value);
+  const y=parseInt(document.getElementById('gem-year').value);
+  if(!y){alert('Please enter a year.');return;}
+  const entry={month:m,year:y,
+    total:parseInt(document.getElementById('gem-total-in').value)||0,
+    open:parseInt(document.getElementById('gem-open-in').value)||0,
+    closed:parseInt(document.getElementById('gem-closed-in').value)||0,
+    high:parseInt(document.getElementById('gem-high').value)||0,
+    medium:parseInt(document.getElementById('gem-medium').value)||0,
+    low:parseInt(document.getElementById('gem-low').value)||0
+  };
+  const data=load('gemba',[]);
+  const idx=data.findIndex(e=>e.year===y&&e.month===m);
+  if(idx>=0)data[idx]=entry; else data.push(entry);
+  save('gemba',data);refreshPanelTables();updateAll();
+}
+function delGemba(i){const d=load('gemba',[]);d.splice(i,1);save('gemba',d);refreshPanelTables();updateAll();}
+
+function saveProject(){
+  const name=document.getElementById('proj-name').value.trim();
+  if(!name){alert('Please enter a project name.');return;}
+  const entry={name,dept:document.getElementById('proj-dept').value,status:document.getElementById('proj-status').value,start:document.getElementById('proj-start').value,target:document.getElementById('proj-target').value,pct:parseInt(document.getElementById('proj-pct').value)||0};
+  const data=load('projects',[]);
+  if(editProjIdx>=0){data[editProjIdx]=entry;editProjIdx=-1;}else data.push(entry);
+  save('projects',data);
+  document.getElementById('proj-name').value='';document.getElementById('proj-pct').value='';
+  refreshPanelTables();updateAll();
+}
+function delProject(i){const d=load('projects',[]);d.splice(i,1);save('projects',d);editProjIdx=-1;refreshPanelTables();updateAll();}
+
+function saveIncident(){
+  const id=document.getElementById('inc-id').value.trim();
+  const date=document.getElementById('inc-date').value;
+  if(!id||!date){alert('Incident ID and Date are required.');return;}
+  const entry={id,date,dept:document.getElementById('inc-dept').value,cat:document.getElementById('inc-cat').value,sev:document.getElementById('inc-sev').value,lti:parseInt(document.getElementById('inc-lti').value)||0,dmg:parseInt(document.getElementById('inc-dmg').value)||0,rc:document.getElementById('inc-rc').value};
+  const data=load('incidents',[]);
+  const idx=data.findIndex(e=>e.id===id);
+  if(idx>=0)data[idx]=entry; else data.push(entry);
+  save('incidents',data);
+  document.getElementById('inc-id').value='';document.getElementById('inc-date').value='';
+  alert('Incident '+id+' saved.');updateAll();
+}
+
+function savePurchase(){
+  const item=document.getElementById('pur-item').value.trim();
+  if(!item){alert('Please enter an item description.');return;}
+  const entry={item,supplier:document.getElementById('pur-supplier').value.trim(),value:parseInt(document.getElementById('pur-value').value)||0,phase:document.getElementById('pur-phase').value,date:document.getElementById('pur-date').value,remarks:document.getElementById('pur-remarks').value.trim()};
+  const data=load('purchases',[]);
+  if(editPurIdx>=0){data[editPurIdx]=entry;editPurIdx=-1;}else data.push(entry);
+  save('purchases',data);
+  ['pur-item','pur-supplier','pur-value','pur-remarks'].forEach(id=>document.getElementById(id).value='');
+  refreshPanelTables();updateAll();
+}
+
+// ── CHART INIT ────────────────────────────────────────────────────────────────
+function initCharts(){
+  const YEARS=getYears();
+  chartYear=new Chart(document.getElementById('c-year'),{
+    type:'bar',
+    data:{labels:YEARS,datasets:[{label:'Incidents',data:YEARS.map(()=>0),backgroundColor:'#0D2137',borderRadius:3,borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'Incidents: '+c.raw}}},
+      scales:{x:{grid:{display:false},ticks:{color:'#6b7280',font:{size:10}}},y:{grid:{color:'#f0f2f5'},ticks:{color:'#6b7280',font:{size:10},stepSize:1},beginAtZero:true}}}
+  });
+
+  chartDept=new Chart(document.getElementById('c-dept'),{
+    type:'bar',
+    data:{labels:DEPTS,datasets:[{label:'Incidents',data:DEPTS.map(()=>0),backgroundColor:'#C8972B',borderRadius:3}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'Incidents: '+c.raw}}},
+      scales:{x:{grid:{color:'#f0f2f5'},ticks:{color:'#6b7280',font:{size:10},stepSize:1},beginAtZero:true},
+        y:{grid:{display:false},ticks:{color:'#374151',font:{size:10,weight:'bold'}}}},
+      onClick:(e,els)=>{
+        if(els.length){
+          const d=DEPTS[els[0].index];
+          activeDept=activeDept===d?'all':d;
+          document.getElementById('g-dept').value=activeDept;
+          updateAll();
+        }
+      }
+    }
+  });
+
+  chartCatYr=new Chart(document.getElementById('c-catyr'),{
+    type:'bar',
+    data:{labels:YEARS,datasets:CATS.map(c=>({label:c,data:YEARS.map(()=>0),backgroundColor:CATCOL[c],borderRadius:2,borderSkipped:false}))},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{x:{stacked:true,grid:{display:false},ticks:{color:'#6b7280',font:{size:10}}},
+        y:{stacked:true,grid:{color:'#f0f2f5'},ticks:{color:'#6b7280',font:{size:10},stepSize:1},beginAtZero:true}}}
+  });
+  const cl=document.getElementById('catyr-legend');
+  CATS.forEach(c=>{cl.innerHTML+=`<span class="legend-item"><span class="legend-sq" style="background:${CATCOL[c]}"></span>${c}</span>`;});
+
+  chartSev=new Chart(document.getElementById('c-sev'),{
+    type:'doughnut',
+    data:{labels:['Minor','Moderate','Major'],datasets:[{data:[0,0,0],backgroundColor:['#1baf7a','#eda100','#d03b3b'],borderWidth:2,borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},cutout:'62%'}
+  });
+
+  chartCat=new Chart(document.getElementById('c-cat'),{
+    type:'doughnut',
+    data:{labels:CATS,datasets:[{data:CATS.map(()=>0),backgroundColor:Object.values(CATCOL),borderWidth:2,borderColor:'#fff'}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},cutout:'62%'}
+  });
+
+  chartPTW=new Chart(document.getElementById('c-ptw'),{
+    type:'bar',
+    data:{labels:[],datasets:[{label:'Permits',data:[],backgroundColor:'#0D2137',borderRadius:2,borderSkipped:false}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{x:{grid:{display:false},ticks:{color:'#6b7280',font:{size:9}}},
+        y:{grid:{color:'#f0f2f5'},ticks:{color:'#6b7280',font:{size:9},stepSize:1},beginAtZero:true}}}
+  });
+
+  chartGemba=new Chart(document.getElementById('c-gemba'),{
+    type:'bar',
+    data:{labels:[],datasets:[
+      {label:'Open',data:[],backgroundColor:'#d03b3b',borderRadius:2,borderSkipped:false},
+      {label:'Closed',data:[],backgroundColor:'#1baf7a',borderRadius:2,borderSkipped:false}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:true,position:'top',labels:{boxWidth:8,font:{size:9},color:'#6b7280'}}},
+      scales:{x:{grid:{display:false},ticks:{color:'#6b7280',font:{size:9}}},
+        y:{grid:{color:'#f0f2f5'},ticks:{color:'#6b7280',font:{size:9},stepSize:1},beginAtZero:true}}}
+  });
+
+  const hiradcEl=document.getElementById('c-hiradc');
+  if(hiradcEl){
+    const HD=getHiradcData();
+    chartHiradc=new Chart(hiradcEl,{
+      type:'bar',
+      data:{labels:HD.map(d=>d.dept),datasets:[
+        {label:'High',data:HD.map(d=>d.high),backgroundColor:'#d03b3b',borderRadius:2,borderSkipped:false},
+        {label:'Medium',data:HD.map(d=>d.medium),backgroundColor:'#eda100',borderRadius:2,borderSkipped:false},
+        {label:'Low',data:HD.map(d=>d.low),backgroundColor:'#1baf7a',borderRadius:2,borderSkipped:false}
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:true,position:'top',labels:{boxWidth:8,font:{size:9},color:'#6b7280'}}},
+        scales:{x:{stacked:true,grid:{display:false},ticks:{color:'#6b7280',font:{size:9}}},
+          y:{stacked:true,grid:{color:'#f0f2f5'},ticks:{color:'#6b7280',font:{size:9}},beginAtZero:true}}}
+    });
+  }
+}
+
+// ── BOOT ──────────────────────────────────────────────────────────────────────
+const _gd=TODAY.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+document.getElementById('print-date').textContent='Generated: '+_gd;
+document.getElementById('print-date-2').textContent='Generated: '+_gd;
+// Restore "Data as of" from localStorage
+(function(){const v=load('asOf',null);if(v){document.getElementById('data-as-of').value=v;renderAsOf(v);}})();
+initCharts();
+updateAll();
+</script>
+</body>
+</html>
